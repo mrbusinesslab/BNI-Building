@@ -1,0 +1,34 @@
+  {company:"傑出油漆工程行", name:"蘇祺傑", desc:"油漆工程｜室內粉刷與牆面翻新", tags:["paint","renovation","water","commercial","unknown"]},
+  {company:"禾亞綠電工程有限公司", name:"陳緯達", desc:"綠電工程｜能源設備與機電整合", tags:["electric","commercial","unknown"]},
+  {company:"快訊機電工程有限公司", name:"姚羿汝", desc:"機電工程｜消防、儀控與環控設備", tags:["electric","commercial","renovation","unknown"]}
+];
+
+const needsData = [
+  {key:"water", icon:"💧", title:"漏水／防水", small:"抓漏、防水、壁癌", text:"這類案件通常會先從漏水檢測開始，再依現場狀況安排防水、泥作或油漆修繕。", steps:["漏水檢測","防水工程","泥作修繕","油漆收尾"]},
+  {key:"renovation", icon:"🔨", title:"老屋翻修", small:"翻修、改造、整修", text:"老屋翻修通常需要多工種合作，先釐清空間與結構，再依序安排拆除、水電、泥作與表面工程。", steps:["現場評估","拆除","水電","泥作","油漆"]},
+  {key:"paint", icon:"🎨", title:"油漆翻新", small:"粉刷、藝術漆、牆面", text:"針對牆面老化、重新粉刷或空間換色，先確認牆況，再安排底層修補與油漆施工。", steps:["牆況檢查","修補","底漆","面漆"]},
+  {key:"electric", icon:"⚡", title:"水電工程", small:"用水、用電、設備", text:"針對水管、配電、衛浴設備或居家用水用電問題，先判斷故障原因，再安排安裝或維修。", steps:["問題判斷","水電檢查","維修／更換","測試"]},
+  {key:"commercial", icon:"🏢", title:"商空／辦公室", small:"店面、辦公、商業空間", text:"商業空間工程通常需要統整多個工種，從空間需求、水電配置到牆面與完工收尾。", steps:["需求盤點","設計整合","機電／水電","裝修施工","驗收"]},
+  {key:"unknown", icon:"❓", title:"我不知道該找誰", small:"先描述你的問題", text:"不用先判斷工種。先說明你遇到的狀況，再由系統協助判斷可能需要哪些專業人員。", steps:["描述問題","初步判斷","推薦工種","找到專業成員"]}
+];
+
+const needsEl = document.getElementById("needs");
+const stepsEl = document.getElementById("steps");
+const membersEl = document.getElementById("members");
+const matchCountEl = document.getElementById("matchCount");
+function renderNeeds(activeKey){needsEl.innerHTML = needsData.map(d=>`<div class="need ${d.key===activeKey?'active':''}" onclick="selectNeed('${d.key}')"><div class="icon">${d.icon}</div><b>${d.title}</b><span>${d.small}</span></div>`).join("");}
+const processGroups = {
+  water:[{title:"漏水檢測",note:"先找出漏水來源與問題位置",names:["鍾師富","楊庭瑞"]},{title:"水電檢查",note:"確認水管、給排水或設備是否異常",names:["林佑丞"]},{title:"泥作修繕",note:"處理牆面、磁磚或結構表面修補",names:["王吉豐"]},{title:"油漆收尾",note:"漏水問題處理後進行牆面復原",names:["蘇祺傑"]}],
+  renovation:[{title:"規劃／統包",note:"先確認需求、預算與整體施工安排",names:["阮凱程","陳奕訢","蔡宗龍","黃敬祐"]},{title:"拆除清運",note:"舊有裝修拆除與現場整理",names:["賴昺諺"]},{title:"水電／機電",note:"處理管線、配電與設備配置",names:["林佑丞","姚羿汝","邱一晉","蔡榮德","陳緯達"]},{title:"泥作／防水",note:"處理基礎修繕、防水與牆地面工程",names:["王吉豐","鍾師富","楊庭瑞"]},{title:"木作／地板／廚房",note:"進入空間造作與設備整合",names:["蔡志瑄","吳玫勳","楊正綱"]},{title:"油漆收尾",note:"最後完成牆面與整體視覺收尾",names:["蘇祺傑"]}],
+  paint:[{title:"牆況檢查",note:"先判斷牆面是否有滲水或基底問題",names:["鍾師富","楊庭瑞"]},{title:"油漆翻新",note:"牆面修補、底漆與面漆施工",names:["蘇祺傑"]}],
+  electric:[{title:"水電施工",note:"處理住宅用水、用電與設備安裝",names:["林佑丞"]},{title:"弱電／智慧設備",note:"監視器、網路、智慧照明與控制",names:["邱一晉","蔡榮德"]},{title:"機電／綠電",note:"較大型機電、消防、儀控與能源設備",names:["姚羿汝","陳緯達"]}],
+  commercial:[{title:"空間規劃",note:"先做商空設計、建築與整體工程規劃",names:["陳奕訢","蔡宗龍","黃敬祐","阮凱程"]},{title:"拆除／基礎工程",note:"拆除、泥作、防水與基礎檢測",names:["賴昺諺","王吉豐","鍾師富","楊庭瑞"]},{title:"水電／機電／弱電",note:"配置用水、用電、機電與資訊設備",names:["林佑丞","姚羿汝","邱一晉","陳緯達"]},{title:"木作／地板／廚房",note:"完成空間造作與設備配置",names:["蔡志瑄","吳玫勳","楊正綱"]},{title:"照明／油漆收尾",note:"完成燈光、智慧設備與視覺收尾",names:["蔡榮德","蘇祺傑"]}]
+};
+function memberByName(name){return allMembers.find(m=>m.name===name)}
+function personCard(m){if(!m)return"";const ready=hasProfileData(m.name);return `<div class="flow-person" ${ready?`onclick="openProfile('${m.name}')"`:""}><div class="company">${m.company}</div><div class="name">${m.name}</div><div class="desc">${m.desc}</div></div>`;}
+function renderMatchedMembers(key){if(key==="unknown"){matchCountEl.textContent=`目前顯示建築組全部 ${allMembers.length} 位專業成員`;membersEl.innerHTML=`<div class="flow-group"><div class="flow-group-head"><div class="flow-step-no">?</div><div><div class="flow-role-title">先從全部專業成員找方向</div><div class="flow-role-sub">還不知道該找誰時，可以先看每位成員的專業定位</div></div></div><div class="all-members-group">${allMembers.map(personCard).join("")}</div></div>`;return;}const groups=processGroups[key]||[];const uniqueNames=[...new Set(groups.flatMap(g=>g.names))];matchCountEl.textContent=`依處理流程分成 ${groups.length} 個階段，共 ${uniqueNames.length} 位適合人選`;membersEl.innerHTML=groups.map((g,idx)=>`<div class="flow-group"><div class="flow-group-head"><div class="flow-step-no">${idx+1}</div><div><div class="flow-role-title">${g.title}</div><div class="flow-role-sub">${g.note}</div></div></div><div class="flow-members">${g.names.map(n=>personCard(memberByName(n))).join("")}</div></div>${idx<groups.length-1?'<div class="flow-connector">↓</div>':''}`).join("");}
+function getTextNode(box){if(!box)return null;const stack=[box];while(stack.length){const node=stack.shift();if(node&&node.type==="text"&&node.text)return node;if(node&&Array.isArray(node.contents))stack.push(...node.contents)}return null;}
+function parseFlexCardJson(data){const bubbles=Array.isArray(data?.contents)?data.contents:[];return bubbles.map(bubble=>{const bodyContents=bubble?.body?.contents||[];const imageIndex=bodyContents.findIndex(x=>x?.type==="image");const imageNode=imageIndex>=0?bodyContents[imageIndex]:null;const footer=bodyContents.slice(imageIndex+1).find(x=>x?.type==="box"&&Array.isArray(x.contents))||null;const buttons=footer?(footer.contents||[]).filter(x=>x?.type==="box"&&x.action).map(btn=>{const textNode=getTextNode(btn);return{text:textNode?.text||btn.action?.label||"按鈕",url:btn.action?.uri||"#",bg:btn.backgroundColor||"#ffffff",border:btn.borderColor||"#d5d0c6",borderWidth:btn.borderWidth||"none",color:textNode?.color||"#222222"}}):[];return{image:imageNode?.url||"",footerBg:footer?.backgroundColor||"#ffffff",buttons}}).filter(p=>p.image)}
+async function loadCardPagesFromJson(name){const url=discoveredCardJsonUrls[name]||fallbackCardJsonUrls[name];if(!url)return null;try{const res=await fetch(url,{cache:"no-store"});if(!res.ok)throw new Error("JSON fetch failed");return parseFlexCardJson(await res.json())}catch(err){console.warn("無法即時讀取名片 JSON：",name,err);return null}}
+const ecardContent = {};
+async function renderEcardGallery(m){const gallery=document.getElementById("ecardGallery");gallery.innerHTML=`<div style="color:#7d9097;font-size:13px">名片載入中…</div>`;const livePages=await loadCardPagesFromJson(m.name);const pages=(livePages&&livePages.length)?livePages:[];if(!pages.length){gallery.innerHTML="";return}gallery.innerHTML=pages.map((p,i)=>`<div class="ecard-page"><div class="ecard-frame"><div class="ecard-image"><img src="${p.image}" alt="${m.name} 電子名片第 ${i+1} 頁"></div>${p.buttons.length?`<div class="ecard-buttons" style="background:${p.footerBg};">${p.buttons.map(b=>`<a class="ecard-link-btn" href="${b.url}" target="_blank" rel="noopener noreferrer" style="background:${b.bg};border-color:${b.border};border-width:${b.borderWidth==="none"?"0":"1px"};color:${b.color};border-radius:4px;">${b.text}</a>`).join("")}</div>`:""}</div></div>`).join("")}
