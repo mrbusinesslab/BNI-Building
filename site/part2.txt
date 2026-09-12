@@ -37,7 +37,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar"><div class="brand"><div class="brandmark">建</div><div>磐石砌好厝<small>工程資源中心</small></div></div><div class="tag">建築產業入口 DEMO</div></div>
+  <div class="topbar"><div class="brand"><div class="brandmark"><img src="logo.png" alt="磐石砌好厝 Logo" style="width:42px;height:42px;object-fit:cover;border-radius:12px;display:block"></div><div>磐石砌好厝<small>工程資源中心</small></div></div><div class="tag">建築產業入口 DEMO</div></div>
   <section class="hero"><div><div class="eyebrow">從「找人」變成「解決問題」</div><h1>你今天要解決<br>什麼工程問題？</h1><p>先選擇你的需求，我們會整理可能需要的工種與適合的專業成員。你只需要記住這一個入口。</p></div></section>
   <section class="section"><div class="section-head"><div><h2>選擇你的需求</h2><div class="sub">點一個分類，看系統怎麼分流</div></div></div><div class="needs" id="needs"></div></section>
   <section class="section"><div class="solution"><div class="panel"><h3 id="solutionTitle">漏水／防水</h3><p id="solutionText">這類案件通常會先從漏水檢測開始，再依現場狀況安排防水、泥作或油漆修繕。</p></div><div class="panel"><h3>可能的處理流程</h3><div class="steps" id="steps"></div></div></div></section>
