@@ -1,0 +1,84 @@
+    background:#00465f;color:#fff;
+  }
+  .profile-btn.secondary{
+    background:#e9f1f4;color:#00465f;
+  }
+  .case-list,.bni-list{
+    display:grid; gap:10px;
+  }
+  .case-item,.bni-item{
+    border:1px solid #e1e8eb;
+    border-radius:14px;
+    padding:14px;
+    background:#fbfcfd;
+  }
+  .case-item b,.bni-item b{color:#17323d}
+  .case-item span,.bni-item span{
+    display:block;
+    color:#778991;
+    font-size:12px;
+    margin-top:4px;
+    line-height:1.5;
+  }
+  .placeholder-note{color:#8ca0a7 !important;font-size:12px;margin-top:8px !important;}
+  @media(max-width:820px){.profile-grid{grid-template-columns:1fr}.profile-hero{padding:22px}.profile-name{font-size:32px}}
+  .profile-section-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px;}
+  .profile-section-title-row h3{margin-bottom:4px}.profile-section-caption{color:#82949b;font-size:12px;line-height:1.5}
+  .profile-card-showcase{grid-column:1/-1}
+  .ecard-gallery{display:grid;grid-template-columns:repeat(5,minmax(155px,1fr));gap:12px;overflow-x:auto;padding-bottom:5px;}
+  .ecard-page{min-width:160px}.ecard-frame{background:#fff;border:1px solid #d7e1e5;border-radius:12px;overflow:hidden}.ecard-image{aspect-ratio:2/3;background:#edf3f5;overflow:hidden}.ecard-image img{width:100%;height:100%;display:block;object-fit:cover}.ecard-buttons{padding:7px 10px 12px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box}.ecard-link-btn{width:100%;min-height:42px;padding:8px 10px;box-sizing:border-box;text-decoration:none;text-align:center;cursor:pointer;font-family:inherit;font-size:11px;line-height:1.35;font-weight:400;border-style:solid;display:flex;align-items:center;justify-content:center}
+  @media(max-width:820px){.ecard-gallery{display:flex;overflow-x:auto;scroll-snap-type:x mandatory}.ecard-page{min-width:72vw;scroll-snap-align:start}}
+  .case-list.three-cases{grid-template-columns:repeat(3,1fr);display:grid;gap:12px}.case-link{text-decoration:none;color:inherit;display:block}.case-item.case-clickable{height:100%;transition:.18s;cursor:pointer}.case-item.case-clickable:hover{transform:translateY(-2px);border-color:#9bbec9;box-shadow:0 8px 18px rgba(0,70,95,.08)}.case-source{display:inline-block;margin-top:10px;color:#00465f;font-weight:800;font-size:12px}@media(max-width:820px){.case-list.three-cases{grid-template-columns:1fr}}
+  .flow-person,.member.directory-card{opacity:1}.flow-person:not([onclick]),.member.directory-card:not([onclick]){cursor:default}.is-hidden{display:none !important}.profile-card-showcase{width:100%}.profile-grid.single-column{grid-template-columns:1fr}
+  .contact-section{border:1px solid #dbe5e8;background:#fbfcfd}.contact-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.contact-action{display:flex;align-items:center;gap:12px;min-width:0;padding:16px 18px;border-radius:14px;background:#fff;border:1px solid #d7e4e8;text-decoration:none;color:#17323d;transition:.18s}.contact-action:hover{border-color:#9dbdc8;box-shadow:0 8px 18px rgba(0,70,95,.08);transform:translateY(-1px)}.contact-icon{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:#00465f;color:#fff;font-size:12px;font-weight:800;flex:0 0 38px}.contact-copy{min-width:0}.contact-type{color:#17323d;font-size:15px;font-weight:800;line-height:1.25;margin-bottom:4px}.contact-display{color:#72858d;font-size:13px;font-weight:400;line-height:1.35;overflow-wrap:anywhere}@media(max-width:820px){.contact-actions{grid-template-columns:1fr}.ecard-buttons{padding:7px 10px 12px;gap:8px}.ecard-link-btn{min-height:48px;font-size:13px}}
+  @media(min-width:1200px){.profile-panel{width:min(1500px,96vw);max-width:1500px}.ecard-gallery{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;overflow:visible;padding-bottom:0}.ecard-page{min-width:0;width:100%}}
+  @media(min-width:821px) and (max-width:1199px){.profile-panel{width:min(1100px,96vw)}.ecard-gallery{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x mandatory}.ecard-page{flex:0 0 230px;min-width:230px;scroll-snap-align:start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="brand"><div class="brandmark">建</div><div>磐石砌好厝<small>工程資源中心</small></div></div><div class="tag">建築產業入口 DEMO</div></div>
+  <section class="hero"><div><div class="eyebrow">從「找人」變成「解決問題」</div><h1>你今天要解決<br>什麼工程問題？</h1><p>先選擇你的需求，我們會整理可能需要的工種與適合的專業成員。你只需要記住這一個入口。</p></div></section>
+  <section class="section"><div class="section-head"><div><h2>選擇你的需求</h2><div class="sub">點一個分類，看系統怎麼分流</div></div></div><div class="needs" id="needs"></div></section>
+  <section class="section"><div class="solution"><div class="panel"><h3 id="solutionTitle">漏水／防水</h3><p id="solutionText">這類案件通常會先從漏水檢測開始，再依現場狀況安排防水、泥作或油漆修繕。</p></div><div class="panel"><h3>可能的處理流程</h3><div class="steps" id="steps"></div></div></div></section>
+  <section class="section match-zone"><div class="match-zone-head"><div><h2>適合你的專業成員</h2><div id="matchCount" style="display:none"></div></div><div class="match-badge">MATCH</div></div><div class="matched-flow" id="members"></div></section>
+  <section class="section directory-section">
+    <div class="section-head"><div><h2>建築組專業成員</h2><div class="sub">每張小卡只保留公司名稱、姓名與一句話專業定位</div></div></div>
+    <div class="members directory-grid">
+      <div class="member directory-card" onclick="openProfile('鍾師富')"><div class="company">詠順工程行</div><div class="name">鍾師富</div><div class="desc">科技抓漏，杜絕漏水</div></div>
+      <div class="member directory-card"><div class="company">尚晉通科技企業社</div><div class="name">邱一晉</div><div class="desc">弱電工程｜監視器、網路與設備整合</div></div>
+      <div class="member directory-card"><div class="company">年輕人有限公司</div><div class="name">林佑丞</div><div class="desc">水電工程｜居家修繕與設備安裝</div></div>
+      <div class="member directory-card"><div class="company">耕家實業有限公司</div><div class="name">阮凱程</div><div class="desc">裝修統包｜住宅翻修與整體工程整合</div></div>
+      <div class="member directory-card"><div class="company">穩納工程有限公司</div><div class="name">王吉豐</div><div class="desc">泥作工程｜砌磚、打底與修繕施工</div></div>
+      <div class="member directory-card"><div class="company">傑詩設計室內裝修有限公司</div><div class="name">陳奕訢</div><div class="desc">室內設計｜空間規劃與裝修整合</div></div>
+      <div class="member directory-card"><div class="company">帝潤空間美學室內裝修有限公司</div><div class="name">蔡宗龍</div><div class="desc">空間設計｜住宅、商空與老屋翻修</div></div>
+      <div class="member directory-card"><div class="company">重光科研有限公司</div><div class="name">楊庭瑞</div><div class="desc">工程檢測｜防水、防蝕與非破壞檢測</div></div>
+      <div class="member directory-card"><div class="company">沐本室內裝修設計有限公司</div><div class="name">蔡志瑄</div><div class="desc">木作裝修｜室內設計與空間改造</div></div>
+      <div class="member directory-card"><div class="company">鍾子柔建築師事務所</div><div class="name">黃敬祐</div><div class="desc">建築規劃｜設計、監造與技術服務</div></div>
+      <div class="member directory-card"><div class="company">兆朋工程股份有限公司</div><div class="name">賴昺諺</div><div class="desc">拆除工程｜拆除、清運與鷹架施工</div></div>
+      <div class="member directory-card"><div class="company">亞士特科技有限公司</div><div class="name">蔡榮德</div><div class="desc">智慧照明｜燈光設計與智能環控整合</div></div>
+      <div class="member directory-card"><div class="company">楊境設計裝潢工程行</div><div class="name">楊正綱</div><div class="desc">廚房設計｜廚具規劃與居家空間整合</div></div>
+      <div class="member directory-card"><div class="company">廣德地板企業有限公司</div><div class="name">吳玫勳</div><div class="desc">木地板｜地板規劃、產品與施工服務</div></div>
+      <div class="member directory-card"><div class="company">傑出油漆工程行</div><div class="name">蘇祺傑</div><div class="desc">油漆工程｜室內粉刷與牆面翻新</div></div>
+      <div class="member directory-card"><div class="company">禾亞綠電工程有限公司</div><div class="name">陳緯達</div><div class="desc">綠電工程｜能源設備與機電整合</div></div>
+      <div class="member directory-card"><div class="company">快訊機電工程有限公司</div><div class="name">姚羿汝</div><div class="desc">機電工程｜消防、儀控與環控設備</div></div>
+    </div>
+  </section>
+  <div class="footer">MR BUSINESS LAB｜建築組產業入口概念版</div>
+</div>
+<script>
+const allMembers = [
+  {company:"詠順工程行", name:"鍾師富", desc:"科技抓漏，杜絕漏水", tags:["water","renovation","commercial","unknown"]},
+  {company:"尚晉通科技企業社", name:"邱一晉", desc:"弱電工程｜監視器、網路與設備整合", tags:["commercial","electric","renovation","unknown"]},
+  {company:"年輕人有限公司", name:"林佑丞", desc:"水電工程｜居家修繕與設備安裝", tags:["electric","renovation","commercial","water","unknown"]},
+  {company:"耕家實業有限公司", name:"阮凱程", desc:"裝修統包｜住宅翻修與整體工程整合", tags:["renovation","commercial","unknown"]},
+  {company:"穩納工程有限公司", name:"王吉豐", desc:"泥作工程｜砌磚、打底與修繕施工", tags:["renovation","water","commercial","unknown"]},
+  {company:"傑詩設計室內裝修有限公司", name:"陳奕訢", desc:"室內設計｜空間規劃與裝修整合", tags:["renovation","commercial","unknown"]},
+  {company:"帝潤空間美學室內裝修有限公司", name:"蔡宗龍", desc:"空間設計｜住宅、商空與老屋翻修", tags:["renovation","commercial","unknown"]},
+  {company:"重光科研有限公司", name:"楊庭瑞", desc:"工程檢測｜防水、防蝕與非破壞檢測", tags:["water","commercial","unknown"]},
+  {company:"沐本室內裝修設計有限公司", name:"蔡志瑄", desc:"木作裝修｜室內設計與空間改造", tags:["renovation","commercial","unknown"]},
+  {company:"鍾子柔建築師事務所", name:"黃敬祐", desc:"建築規劃｜設計、監造與技術服務", tags:["renovation","commercial","unknown"]},
+  {company:"兆朋工程股份有限公司", name:"賴昺諺", desc:"拆除工程｜拆除、清運與鷹架施工", tags:["renovation","commercial","unknown"]},
+  {company:"亞士特科技有限公司", name:"蔡榮德", desc:"智慧照明｜燈光設計與智能環控整合", tags:["electric","commercial","renovation","unknown"]},
+  {company:"楊境設計裝潢工程行", name:"楊正綱", desc:"廚房設計｜廚具規劃與居家空間整合", tags:["renovation","commercial","unknown"]},
+  {company:"廣德地板企業有限公司", name:"吳玫勳", desc:"木地板｜地板規劃、產品與施工服務", tags:["renovation","commercial","unknown"]},
