@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>磐石砌好厝｜工程資源中心</title>
+</head>
+<body>
+<div id="loading" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC','Microsoft JhengHei',sans-serif;padding:32px;color:#17323d">載入中…</div>
+<script>
+(async()=>{
+  try{
+    const files=['site/part1.txt','site/part2.txt','site/part3.txt','site/part4.txt'];
+    const parts=await Promise.all(files.map(f=>fetch(f,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(f);return r.text();})));
+    document.open();
+    document.write(parts.join(''));
+    document.close();
+  }catch(err){
+    document.getElementById('loading').textContent='網站載入失敗，請重新整理。';
+    console.error(err);
+  }
+})();
+</script>
+</body>
+</html>
