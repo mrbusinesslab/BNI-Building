@@ -37,13 +37,13 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar"><div class="brand"><div class="brandmark">建</div><div>磐石砌好厝<small>工程資源中心</small></div></div><div class="tag">建築產業入口 DEMO</div></div>
-  <section class="hero"><div><div class="eyebrow">從「找人」變成「解決問題」</div><h1>你今天要解決<br>什麼工程問題？</h1><p>先選擇你的需求，我們會整理可能需要的工種與適合的專業成員。你只需要記住這一個入口。</p></div></section>
+  <div class="topbar"><div class="brand"><div class="brandmark">建</div><div>磐石砌好厝<small>工程資源中心</small></div></div><a class="tag" href="https://mrbusinesslab.github.io/BNI-Building/admin/" style="text-decoration:none">後台管理</a></div>
+  <section class="hero"><div><div class="eyebrow">從「找人」變成「解決問題」</div><h1>你今天要解決<br>什麼工程問題？</h1><p>先選擇你的需求，我們會整理可能需要的工種與適合的專業成員。</p></div></section>
   <section class="section"><div class="section-head"><div><h2>選擇你的需求</h2><div class="sub">點一個分類，看系統怎麼分流</div></div></div><div class="needs" id="needs"></div></section>
   <section class="section"><div class="solution"><div class="panel"><h3 id="solutionTitle">漏水／防水</h3><p id="solutionText">這類案件通常會先從漏水檢測開始，再依現場狀況安排防水、泥作或油漆修繕。</p></div><div class="panel"><h3>可能的處理流程</h3><div class="steps" id="steps"></div></div></div></section>
   <section class="section match-zone"><div class="match-zone-head"><div><h2>適合你的專業成員</h2><div id="matchCount" style="display:none"></div></div><div class="match-badge">MATCH</div></div><div class="matched-flow" id="members"></div></section>
   <section class="section directory-section">
-    <div class="section-head"><div><h2>建築組專業成員</h2><div class="sub">每張小卡只保留公司名稱、姓名與一句話專業定位</div></div></div>
+    <div class="section-head"><div><h2>建築組專業成員</h2></div></div>
     <div class="members directory-grid">
       <div class="member directory-card" onclick="openProfile('鍾師富')"><div class="company">詠順工程行</div><div class="name">鍾師富</div><div class="desc">科技抓漏，杜絕漏水</div></div>
       <div class="member directory-card"><div class="company">尚晉通科技企業社</div><div class="name">邱一晉</div><div class="desc">弱電工程｜監視器、網路與設備整合</div></div>
