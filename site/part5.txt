@@ -4,14 +4,71 @@ const PUBLIC_SB_URL='https://packaiwgsswrjvxdsejw.supabase.co';
 const PUBLIC_SB_KEY='sb_publishable_Jrp7cxW-ppSJtrk-lScZjA_blNEnBRG';
 const publicSb=supabase.createClient(PUBLIC_SB_URL,PUBLIC_SB_KEY,{auth:{persistSession:false}});
 const backendProfiles=new Map();
-const existingTagMap=new Map(allMembers.map(m=>[m.name,m.tags||['unknown']]));
+
+const dynamicProcessConfig={
+  water:[
+    {title:'漏水檢測',note:'先找出漏水來源與問題位置',roles:['leak_detection','inspection']},
+    {title:'水電檢查',note:'確認水管、給排水或設備是否異常',roles:['plumbing']},
+    {title:'泥作／防水修繕',note:'處理牆面、磁磚、防水或結構表面修補',roles:['masonry','waterproof_masonry']},
+    {title:'油漆收尾',note:'漏水問題處理後進行牆面復原',roles:['painting']}
+  ],
+  renovation:[
+    {title:'規劃／統包',note:'先確認需求、預算與整體施工安排',roles:['planning_gc','planning_design','planning_architect']},
+    {title:'拆除清運',note:'舊有裝修拆除與現場整理',roles:['demolition']},
+    {title:'水電／機電',note:'處理管線、配電、弱電與設備配置',roles:['plumbing','electrical','low_voltage','mep','green_energy','smart_lighting']},
+    {title:'泥作／防水',note:'處理基礎修繕、防水與牆地面工程',roles:['masonry','leak_detection','inspection','waterproof_masonry']},
+    {title:'木作／地板／廚房',note:'進入空間造作與設備整合',roles:['woodwork','flooring','kitchen']},
+    {title:'油漆收尾',note:'最後完成牆面與整體視覺收尾',roles:['painting']}
+  ],
+  paint:[
+    {title:'牆況檢查',note:'先判斷牆面是否有滲水或基底問題',roles:['leak_detection','inspection','waterproof_masonry']},
+    {title:'油漆翻新',note:'牆面修補、底漆與面漆施工',roles:['painting']}
+  ],
+  electric:[
+    {title:'水電施工',note:'處理住宅用水、用電與設備安裝',roles:['plumbing']},
+    {title:'弱電／智慧設備',note:'監視器、網路、智慧照明與控制',roles:['low_voltage','smart_lighting']},
+    {title:'機電／綠電',note:'較大型機電、消防、儀控與能源設備',roles:['electrical','mep','green_energy']}
+  ],
+  commercial:[
+    {title:'空間規劃',note:'先做商空設計、建築與整體工程規劃',roles:['planning_gc','planning_design','planning_architect']},
+    {title:'拆除／基礎工程',note:'拆除、泥作、防水與基礎檢測',roles:['demolition','masonry','leak_detection','inspection','waterproof_masonry']},
+    {title:'水電／機電／弱電',note:'配置用水、用電、機電與資訊設備',roles:['plumbing','electrical','low_voltage','mep','green_energy']},
+    {title:'木作／地板／廚房',note:'完成空間造作與設備配置',roles:['woodwork','flooring','kitchen']},
+    {title:'照明／油漆收尾',note:'完成燈光、智慧設備與視覺收尾',roles:['smart_lighting','painting']}
+  ]
+};
 
 function contactIcon(type){return type==='phone'?'☎':type==='instagram'?'IG':type==='facebook'?'f':String(type||'').includes('line')?'LINE':'↗'}
+function memberRoles(m){return Array.isArray(m.role_keys)?m.role_keys:[]}
+function memberProblems(m){return Array.isArray(m.problem_keys)?m.problem_keys:[]}
+function routePersonCard(m){if(!m)return'';const ready=hasProfileData(m.name);return `<div class="flow-person" ${ready?`onclick="openProfile('${m.name}')"`:''}><div class="company">${m.company||''}</div><div class="name">${m.name}</div><div class="desc">${m.desc||''}</div></div>`}
 function renderDirectoryFromBackend(){
   const grid=document.querySelector('.directory-grid'); if(!grid)return;
   grid.innerHTML=allMembers.map(m=>`<div class="member directory-card"><div class="company">${m.company||''}</div><div class="name">${m.name}</div><div class="desc">${m.desc||''}</div></div>`).join('');
   syncDirectoryCardsInteractivity();
 }
+
+renderMatchedMembers=function(key){
+  if(key==='unknown'){
+    matchCountEl.textContent=`目前顯示建築組全部 ${allMembers.length} 位專業成員`;
+    membersEl.innerHTML=`<div class="flow-group"><div class="flow-group-head"><div class="flow-step-no">?</div><div><div class="flow-role-title">先從全部專業成員找方向</div><div class="flow-role-sub">還不知道該找誰時，可以先看每位成員的專業定位</div></div></div><div class="all-members-group">${allMembers.map(routePersonCard).join('')}</div></div>`;
+    return;
+  }
+  const eligible=allMembers.filter(m=>memberProblems(m).includes(key));
+  const configs=dynamicProcessConfig[key]||[];
+  const used=new Set();
+  const groups=[];
+  configs.forEach(cfg=>{
+    const people=eligible.filter(m=>memberRoles(m).some(r=>cfg.roles.includes(r)));
+    people.forEach(m=>used.add(m.name));
+    if(people.length)groups.push({...cfg,people});
+  });
+  const other=eligible.filter(m=>!used.has(m.name));
+  if(other.length)groups.push({title:'其他相關專業',note:'此成員已被設定可協助這類問題',people:other});
+  matchCountEl.textContent=`依處理流程分成 ${groups.length} 個階段，共 ${eligible.length} 位適合人選`;
+  membersEl.innerHTML=groups.length?groups.map((g,idx)=>`<div class="flow-group"><div class="flow-group-head"><div class="flow-step-no">${idx+1}</div><div><div class="flow-role-title">${g.title}</div><div class="flow-role-sub">${g.note}</div></div></div><div class="flow-members">${g.people.map(routePersonCard).join('')}</div></div>${idx<groups.length-1?'<div class="flow-connector">↓</div>':''}`).join(''):'<div class="matched-empty">目前尚未設定可處理這類問題的成員。</div>';
+};
+
 async function loadBackendProfiles(){
   const [mr,cr,br,tr]=await Promise.all([
     publicSb.from('bni_members').select('*').eq('is_published',true).order('sort_order'),
@@ -28,7 +85,7 @@ async function loadBackendProfiles(){
   collabs.forEach(x=>{const m=byId.get(x.member_id);if(m&&backendProfiles.has(m.name))backendProfiles.get(m.name).collabs.push(x)});
   contacts.forEach(x=>{const m=byId.get(x.member_id);if(m&&backendProfiles.has(m.name))backendProfiles.get(m.name).contacts.push(x)});
 
-  const mapped=members.map(m=>({company:m.company||'',name:m.name,desc:m.tagline||'',tags:existingTagMap.get(m.name)||['unknown']}));
+  const mapped=members.map(m=>({company:m.company||'',name:m.name,desc:m.tagline||'',tags:memberProblems(m),problem_keys:memberProblems(m),role_keys:memberRoles(m)}));
   allMembers.splice(0,allMembers.length,...mapped);
   members.forEach(m=>{
     if(m.card_json_url){discoveredCardJsonUrls[m.name]=m.card_json_url;enabledProfiles.add(m.name)}
