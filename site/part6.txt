@@ -36,17 +36,100 @@
   margin-bottom:8px;
   line-height:1.45;
 }
+.mobile-profile-nav,.mobile-contact-bar,.ecard-counter{display:none}
 @media(max-width:1100px){
   .case-list,.bni-list,.case-list.three-cases{
     grid-template-columns:repeat(2,minmax(0,1fr)) !important;
   }
 }
 @media(max-width:820px){
-  .case-list,.bni-list,.case-list.three-cases{
-    grid-template-columns:1fr !important;
-  }
-  .case-item img,.bni-item img{
-    height:220px !important;
-  }
+  .profile-overlay{padding:0;align-items:stretch;background:#f7fafb}
+  .profile-panel{width:100%;height:100dvh;max-height:100dvh;border-radius:0;overflow-y:auto;overscroll-behavior:contain;scroll-behavior:smooth;padding-bottom:82px}
+  .profile-hero{border-radius:0;padding:16px 18px 14px;position:sticky;top:0;z-index:35;box-shadow:0 5px 18px rgba(0,0,0,.12)}
+  .profile-hero .company{font-size:11px;margin-bottom:4px}
+  .profile-name{font-size:27px;line-height:1.05}
+  .profile-tagline{font-size:12px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78vw}
+  .close-profile{width:36px;height:36px;flex:0 0 36px}
+  .profile-body{padding:0 14px 24px;gap:14px}
+  .mobile-profile-nav{display:flex;position:sticky;top:91px;z-index:34;margin:0 -14px 14px;padding:9px 12px;gap:7px;overflow-x:auto;background:rgba(247,250,251,.97);border-bottom:1px solid #dce7ea;box-shadow:0 4px 12px rgba(0,70,95,.05);scrollbar-width:none}
+  .mobile-profile-nav::-webkit-scrollbar{display:none}
+  .mobile-profile-nav button{flex:0 0 auto;border:1px solid #d4e1e5;background:#fff;color:#49616a;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800;white-space:nowrap}
+  .mobile-profile-nav button.active{background:#00465f;color:#fff;border-color:#00465f}
+  .profile-section{border-radius:16px;padding:16px;scroll-margin-top:148px}
+  .profile-section h3{font-size:18px}
+  .ecard-gallery{display:flex!important;gap:12px;overflow-x:auto!important;scroll-snap-type:x mandatory;scroll-padding:0;padding-bottom:7px;-webkit-overflow-scrolling:touch}
+  .ecard-page{flex:0 0 100%!important;min-width:100%!important;width:100%!important;scroll-snap-align:start;scroll-snap-stop:always}
+  .ecard-counter{display:block;text-align:center;font-size:12px;font-weight:800;color:#6f838b;margin-top:7px;letter-spacing:.04em}
+  .case-list,.bni-list,.case-list.three-cases{grid-template-columns:1fr !important;gap:12px}
+  .case-item,.bni-item{padding:14px}
+  .case-item img,.bni-item img{height:220px !important}
+  .case-item span,.bni-item span{font-size:13px;line-height:1.7}
+  .mobile-contact-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:1002;background:rgba(255,255,255,.97);border-top:1px solid #d8e4e8;padding:9px 10px calc(9px + env(safe-area-inset-bottom));gap:8px;box-shadow:0 -8px 24px rgba(0,70,95,.10)}
+  .profile-overlay.open .mobile-contact-bar.has-items{display:flex}
+  .mobile-contact-bar a{flex:1;min-width:0;text-decoration:none;background:#00465f;color:#fff;border-radius:12px;padding:11px 7px;text-align:center;font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
 </style>
+<script>
+(function(){
+  const labels=[
+    ['profile-card-showcase','電子名片'],
+    ['introSection','介紹'],
+    ['bniSection','BNI合作'],
+    ['caseSection','案例'],
+    ['contactSection','聯絡方式']
+  ];
+  function ensureMobileUi(){
+    const body=document.querySelector('.profile-body');
+    if(!body)return;
+    let nav=document.getElementById('mobileProfileNav');
+    if(!nav){
+      nav=document.createElement('div');
+      nav.id='mobileProfileNav';nav.className='mobile-profile-nav';
+      body.prepend(nav);
+      nav.addEventListener('click',e=>{
+        const b=e.target.closest('button[data-target]');if(!b)return;
+        const t=document.getElementById(b.dataset.target)||document.querySelector('.'+b.dataset.target);if(!t)return;
+        t.scrollIntoView({behavior:'smooth',block:'start'});
+        [...nav.querySelectorAll('button')].forEach(x=>x.classList.toggle('active',x===b));
+      });
+    }
+    let bar=document.getElementById('mobileContactBar');
+    if(!bar){bar=document.createElement('div');bar.id='mobileContactBar';bar.className='mobile-contact-bar';document.body.appendChild(bar)}
+    refreshMobileUi();
+  }
+  function refreshNav(){
+    const nav=document.getElementById('mobileProfileNav');if(!nav)return;
+    const items=[];
+    labels.forEach(([id,label])=>{
+      let el=id==='profile-card-showcase'?document.querySelector('.profile-card-showcase'):document.getElementById(id);
+      if(el&&!el.classList.contains('is-hidden'))items.push([id,label]);
+    });
+    nav.innerHTML=items.map((x,i)=>`<button type="button" data-target="${x[0]}" class="${i===0?'active':''}">${x[1]}</button>`).join('');
+  }
+  function refreshCounter(){
+    const gallery=document.getElementById('ecardGallery');if(!gallery)return;
+    let counter=document.getElementById('ecardCounter');
+    if(!counter){counter=document.createElement('div');counter.id='ecardCounter';counter.className='ecard-counter';gallery.insertAdjacentElement('afterend',counter)}
+    const pages=[...gallery.querySelectorAll('.ecard-page')];
+    if(!pages.length){counter.textContent='';return}
+    const update=()=>{const i=Math.max(0,Math.min(pages.length-1,Math.round(gallery.scrollLeft/Math.max(1,gallery.clientWidth))));counter.textContent=`${i+1} / ${pages.length}`};
+    gallery.onscroll=()=>requestAnimationFrame(update);update();
+  }
+  function refreshBottomContacts(){
+    const bar=document.getElementById('mobileContactBar'),src=document.getElementById('profileContacts');if(!bar||!src)return;
+    const links=[...src.querySelectorAll('a')].slice(0,3);
+    bar.innerHTML=links.map(a=>`<a href="${a.getAttribute('href')||'#'}" target="_blank" rel="noopener noreferrer">${(a.querySelector('.contact-type')?.textContent||'聯絡').trim()}</a>`).join('');
+    bar.classList.toggle('has-items',links.length>0);
+  }
+  function refreshMobileUi(){refreshNav();refreshCounter();refreshBottomContacts()}
+  window.addEventListener('DOMContentLoaded',()=>{
+    ensureMobileUi();
+    const overlay=document.getElementById('profileOverlay');
+    const gallery=document.getElementById('ecardGallery');
+    const contacts=document.getElementById('profileContacts');
+    if(overlay)new MutationObserver(()=>setTimeout(refreshMobileUi,50)).observe(overlay,{attributes:true,subtree:true,childList:true,attributeFilter:['class']});
+    if(gallery)new MutationObserver(()=>setTimeout(refreshCounter,30)).observe(gallery,{childList:true,subtree:true});
+    if(contacts)new MutationObserver(()=>setTimeout(refreshBottomContacts,30)).observe(contacts,{childList:true,subtree:true});
+  });
+})();
+</script>
