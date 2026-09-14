@@ -43,28 +43,30 @@
   }
 }
 @media(max-width:820px){
-  .profile-overlay{padding:0;align-items:stretch;background:#f7fafb}
-  .profile-panel{width:100%;height:100dvh;max-height:100dvh;border-radius:0;overflow-y:auto;overscroll-behavior:contain;scroll-behavior:smooth;padding-bottom:82px}
-  .profile-hero{border-radius:0;padding:16px 18px 14px;position:sticky;top:0;z-index:35;box-shadow:0 5px 18px rgba(0,0,0,.12)}
+  html,body{max-width:100%;overflow-x:hidden}
+  .profile-overlay{padding:0;align-items:stretch;background:#f7fafb;overflow-x:hidden;touch-action:pan-y}
+  .profile-panel{width:100%;max-width:100%;height:100dvh;max-height:100dvh;border-radius:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scroll-behavior:smooth;padding-bottom:82px;touch-action:pan-y}
+  .profile-hero{border-radius:0;padding:16px 18px 14px;position:sticky;top:0;z-index:35;box-shadow:0 5px 18px rgba(0,0,0,.12);max-width:100%;overflow:hidden}
+  .profile-hero>div{min-width:0}
   .profile-hero .company{font-size:11px;margin-bottom:4px}
   .profile-name{font-size:27px;line-height:1.05}
   .profile-tagline{font-size:12px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78vw}
   .close-profile{width:36px;height:36px;flex:0 0 36px}
-  .profile-body{padding:0 14px 24px;gap:14px}
-  .mobile-profile-nav{display:flex;position:sticky;top:91px;z-index:34;margin:0 -14px 14px;padding:9px 12px;gap:7px;overflow-x:auto;background:rgba(247,250,251,.97);border-bottom:1px solid #dce7ea;box-shadow:0 4px 12px rgba(0,70,95,.05);scrollbar-width:none}
-  .mobile-profile-nav::-webkit-scrollbar{display:none}
+  .profile-body{padding:0 14px 24px;gap:14px;width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+  .profile-body>*{min-width:0;max-width:100%}
+  .mobile-profile-nav{display:flex;flex-wrap:wrap;position:sticky;top:91px;z-index:34;margin:0 -14px 14px;padding:9px 12px;gap:7px;overflow-x:hidden;background:rgba(247,250,251,.97);border-bottom:1px solid #dce7ea;box-shadow:0 4px 12px rgba(0,70,95,.05)}
   .mobile-profile-nav button{flex:0 0 auto;border:1px solid #d4e1e5;background:#fff;color:#49616a;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800;white-space:nowrap}
   .mobile-profile-nav button.active{background:#00465f;color:#fff;border-color:#00465f}
-  .profile-section{border-radius:16px;padding:16px;scroll-margin-top:148px}
+  .profile-section{border-radius:16px;padding:16px;scroll-margin-top:148px;width:100%;max-width:100%;min-width:0;overflow:hidden}
   .profile-section h3{font-size:18px}
-  .ecard-gallery{display:flex!important;gap:12px;overflow-x:auto!important;scroll-snap-type:x mandatory;scroll-padding:0;padding-bottom:7px;-webkit-overflow-scrolling:touch}
-  .ecard-page{flex:0 0 100%!important;min-width:100%!important;width:100%!important;scroll-snap-align:start;scroll-snap-stop:always}
+  .ecard-gallery{display:flex!important;gap:12px;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory;scroll-padding:0;padding-bottom:7px;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain;max-width:100%}
+  .ecard-page{flex:0 0 100%!important;min-width:100%!important;width:100%!important;max-width:100%!important;scroll-snap-align:start;scroll-snap-stop:always}
   .ecard-counter{display:block;text-align:center;font-size:12px;font-weight:800;color:#6f838b;margin-top:7px;letter-spacing:.04em}
   .case-list,.bni-list,.case-list.three-cases{grid-template-columns:1fr !important;gap:12px}
-  .case-item,.bni-item{padding:14px}
+  .case-item,.bni-item{padding:14px;min-width:0;overflow:hidden}
   .case-item img,.bni-item img{height:220px !important}
-  .case-item span,.bni-item span{font-size:13px;line-height:1.7}
-  .mobile-contact-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:1002;background:rgba(255,255,255,.97);border-top:1px solid #d8e4e8;padding:9px 10px calc(9px + env(safe-area-inset-bottom));gap:8px;box-shadow:0 -8px 24px rgba(0,70,95,.10)}
+  .case-item span,.bni-item span{font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+  .mobile-contact-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:1002;background:rgba(255,255,255,.97);border-top:1px solid #d8e4e8;padding:9px 10px calc(9px + env(safe-area-inset-bottom));gap:8px;box-shadow:0 -8px 24px rgba(0,70,95,.10);max-width:100%;overflow:hidden}
   .profile-overlay.open .mobile-contact-bar.has-items{display:flex}
   .mobile-contact-bar a{flex:1;min-width:0;text-decoration:none;background:#00465f;color:#fff;border-radius:12px;padding:11px 7px;text-align:center;font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
