@@ -1,19 +1,25 @@
 <style>
-/* 案例與 BNI 合作經歷統一為雙欄卡片版型 */
-.case-list,.bni-list{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
+/* 案例與 BNI 合作經歷統一寬度與四欄卡片版型 */
+.profile-grid{
+  grid-template-columns:1fr !important;
 }
-.case-list.three-cases{
-  grid-template-columns:repeat(2,minmax(0,1fr));
+.profile-grid > .profile-section{
+  grid-column:1/-1;
+  width:100%;
+}
+.case-list,.bni-list,.case-list.three-cases{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:12px;
+  width:100%;
 }
 .case-item,.bni-item{
   height:100%;
+  width:100%;
 }
 .case-item img,.bni-item img{
   width:100% !important;
-  height:240px !important;
+  height:180px !important;
   max-height:none !important;
   aspect-ratio:auto !important;
   object-fit:cover !important;
@@ -21,9 +27,14 @@
   margin-bottom:12px !important;
   display:block;
 }
+@media(max-width:1100px){
+  .case-list,.bni-list,.case-list.three-cases{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
 @media(max-width:820px){
   .case-list,.bni-list,.case-list.three-cases{
-    grid-template-columns:1fr;
+    grid-template-columns:1fr !important;
   }
   .case-item img,.bni-item img{
     height:220px !important;
