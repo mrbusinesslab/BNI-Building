@@ -36,7 +36,13 @@
   margin-bottom:8px;
   line-height:1.45;
 }
-.mobile-profile-nav,.mobile-contact-bar,.ecard-counter{display:none}
+.mobile-contact-bar,.ecard-counter{display:none}
+.mobile-profile-nav{display:flex;flex-wrap:wrap;justify-content:center;position:sticky;top:0;z-index:34;width:100%;margin:0;padding:10px 16px;gap:8px;overflow:hidden;background:rgba(247,250,251,.98);border-bottom:1px solid #dce7ea;box-shadow:0 4px 12px rgba(0,70,95,.05)}
+.mobile-profile-nav button{flex:0 0 auto;border:1px solid #d4e1e5;background:#fff;color:#49616a;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:800;white-space:nowrap;transition:background .18s ease,color .18s ease,border-color .18s ease;cursor:pointer}
+.mobile-profile-nav button.active{background:#00465f;color:#fff;border-color:#00465f}
+@media(min-width:821px){
+  .profile-section{scroll-margin-top:72px}
+}
 @media(max-width:1100px){
   .case-list,.bni-list,.case-list.three-cases{
     grid-template-columns:repeat(2,minmax(0,1fr)) !important;
@@ -52,7 +58,7 @@
   .profile-name{font-size:27px;line-height:1.05}
   .profile-tagline{font-size:12px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78vw}
   .close-profile{width:36px;height:36px;flex:0 0 36px}
-  .mobile-profile-nav{display:flex;flex-wrap:wrap;position:sticky;top:var(--profile-hero-h);z-index:34;width:100%;margin:0;padding:9px 12px;gap:7px;overflow:hidden;background:rgba(247,250,251,.98);border-bottom:1px solid #dce7ea;box-shadow:0 4px 12px rgba(0,70,95,.05)}
+  .mobile-profile-nav{display:flex;flex-wrap:wrap;justify-content:flex-start;position:sticky;top:var(--profile-hero-h);z-index:34;width:100%;margin:0;padding:9px 12px;gap:7px;overflow:hidden;background:rgba(247,250,251,.98);border-bottom:1px solid #dce7ea;box-shadow:0 4px 12px rgba(0,70,95,.05)}
   .mobile-profile-nav button{flex:0 0 auto;border:1px solid #d4e1e5;background:#fff;color:#49616a;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800;white-space:nowrap;transition:background .18s ease,color .18s ease,border-color .18s ease}
   .mobile-profile-nav button.active{background:#00465f;color:#fff;border-color:#00465f}
   .profile-body{padding:14px 14px 24px;gap:14px;width:100%;max-width:100%;min-width:0;overflow-x:hidden}
@@ -121,7 +127,8 @@
     if(!panel||!hero||!nav)return;
     const sections=getVisibleSections();if(!sections.length)return;
     if(panel.scrollTop+panel.clientHeight>=panel.scrollHeight-24){setActiveTab(sections[sections.length-1].id);return}
-    const threshold=panel.getBoundingClientRect().top+hero.offsetHeight+nav.offsetHeight+18;
+    const stickyHeight=(window.innerWidth<=820?hero.offsetHeight:0)+nav.offsetHeight;
+    const threshold=panel.getBoundingClientRect().top+stickyHeight+18;
     let current=sections[0];
     for(const s of sections){
       if(s.el.getBoundingClientRect().top<=threshold)current=s;
