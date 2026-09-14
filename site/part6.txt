@@ -107,6 +107,15 @@
     const nav=document.getElementById('mobileProfileNav');if(!nav)return;
     [...nav.querySelectorAll('button[data-target]')].forEach(b=>b.classList.toggle('active',b.dataset.target===activeTarget));
   }
+  function resetProfilePosition(){
+    const panel=document.querySelector('.profile-panel');
+    const gallery=document.getElementById('ecardGallery');
+    if(panel)panel.scrollTop=0;
+    if(gallery)gallery.scrollLeft=0;
+    const first=getVisibleSections()[0];
+    setActiveTab(first?.id||'');
+    requestAnimationFrame(()=>{syncStickyOffsets();updateActiveFromScroll()});
+  }
   function updateActiveFromScroll(){
     const panel=document.querySelector('.profile-panel'),hero=document.querySelector('.profile-hero'),nav=document.getElementById('mobileProfileNav');
     if(!panel||!hero||!nav)return;
@@ -179,6 +188,7 @@
     const overlay=document.getElementById('profileOverlay');
     const gallery=document.getElementById('ecardGallery');
     const contacts=document.getElementById('profileContacts');
+    const profileName=document.getElementById('profileName');
     if(overlay)new MutationObserver(mutations=>{
       const meaningful=mutations.some(m=>{
         const t=m.target;
@@ -186,6 +196,11 @@
       });
       if(meaningful)setTimeout(refreshMobileUi,50);
     }).observe(overlay,{attributes:true,subtree:true,childList:true,attributeFilter:['class']});
+    if(profileName)new MutationObserver(()=>{
+      activeTarget='';
+      setTimeout(()=>{refreshMobileUi();resetProfilePosition()},0);
+      setTimeout(resetProfilePosition,80);
+    }).observe(profileName,{childList:true,characterData:true,subtree:true});
     if(gallery)new MutationObserver(()=>setTimeout(refreshCounter,30)).observe(gallery,{childList:true,subtree:true});
     if(contacts)new MutationObserver(()=>setTimeout(refreshBottomContacts,30)).observe(contacts,{childList:true,subtree:true});
     window.addEventListener('resize',()=>requestAnimationFrame(()=>{syncStickyOffsets();updateActiveFromScroll()}));
