@@ -1,0 +1,46 @@
+<style>
+.building-assistant-launcher{position:fixed;right:18px;bottom:18px;z-index:950;background:#00465f;color:#fff;border:0;border-radius:999px;padding:13px 17px;font:800 14px/1.2 inherit;box-shadow:0 10px 30px rgba(0,70,95,.28);cursor:pointer}
+.building-assistant{position:fixed;right:18px;bottom:74px;width:min(390px,calc(100vw - 24px));height:min(620px,72vh);z-index:951;background:#fff;border:1px solid #d7e4e8;border-radius:18px;box-shadow:0 18px 50px rgba(23,50,61,.2);display:none;overflow:hidden}
+.building-assistant.open{display:flex;flex-direction:column}.assistant-head{background:#00465f;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;gap:12px;align-items:center}.assistant-head b{font-size:16px}.assistant-head small{display:block;opacity:.8;margin-top:2px}.assistant-close{border:0;background:transparent;color:#fff;font-size:24px;cursor:pointer}.assistant-body{flex:1;overflow:auto;padding:14px;background:#f6f9fa}.assistant-msg{max-width:88%;padding:10px 12px;border-radius:14px;margin-bottom:10px;line-height:1.55;font-size:14px;white-space:pre-line}.assistant-msg.bot{background:#fff;border:1px solid #dce7ea;color:#17323d}.assistant-msg.user{margin-left:auto;background:#00465f;color:#fff}.assistant-choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}.assistant-choice{border:1px solid #cbdde3;background:#fff;color:#00465f;border-radius:12px;padding:10px;font-weight:800;cursor:pointer;text-align:left}.assistant-member{background:#fff;border:1px solid #dce7ea;border-radius:14px;padding:12px;margin:8px 0}.assistant-member b{display:block;color:#17323d;font-size:15px}.assistant-member span{display:block;color:#6f838b;font-size:12px;margin-top:4px;line-height:1.5}.assistant-member button{margin-top:9px;border:0;background:#00465f;color:#fff;border-radius:9px;padding:8px 10px;font-weight:800;cursor:pointer}.assistant-input{display:flex;gap:8px;padding:10px;border-top:1px solid #dce7ea;background:#fff}.assistant-input input{flex:1;min-width:0;border:1px solid #cbdde3;border-radius:10px;padding:11px 12px;font:inherit}.assistant-input button{border:0;background:#00465f;color:#fff;border-radius:10px;padding:0 14px;font-weight:800;cursor:pointer}
+@media(max-width:820px){.building-assistant-launcher{right:12px;bottom:12px}.building-assistant{left:8px;right:8px;bottom:64px;width:auto;height:70dvh}}
+</style>
+<script>
+(function(){
+  let currentIntent='';
+  const intentButtons=[
+    ['找人','person_search'],['找專業','profession_search'],['解決問題','problem_solve'],['我不知道該找誰','guided_help']
+  ];
+  const problemMatchers=[
+    ['water',['漏水','滲水','水費','壁癌','發霉','滴水','防水']],
+    ['paint',['油漆','粉刷','牆面','脫漆','掉漆']],
+    ['electric',['水電','插座','電線','跳電','監視器','網路','燈光','照明','機電']],
+    ['renovation',['裝潢','裝修','翻修','老屋','統包','拆除','木作','地板','廚房']],
+    ['commercial',['辦公室','商空','店面','商業空間','公司裝修']]
+  ];
+  function track(event_type,data={}){try{if(!window.publicSb)return;publicSb.from('bni_behavior_events').insert({event_type,member_name:data.member_name||null,intent:data.intent||null,query_text:data.query_text||null,meta:data.meta||{}}).then(()=>{})}catch(e){}}
+  function addMsg(text,who='bot'){const body=document.getElementById('assistantBody');if(!body)return;const d=document.createElement('div');d.className='assistant-msg '+who;d.textContent=text;body.appendChild(d);body.scrollTop=body.scrollHeight}
+  function showChoices(){const body=document.getElementById('assistantBody');if(!body)return;const box=document.createElement('div');box.className='assistant-choices';box.innerHTML=intentButtons.map(([label,key])=>`<button class="assistant-choice" data-intent="${key}">${label}</button>`).join('');body.appendChild(box);body.scrollTop=body.scrollHeight}
+  function showFallback(){addMsg('我目前還無法判斷你的需求。\n你比較想要哪一種服務？');showChoices();track('chat_fallback',{intent:currentIntent})}
+  function memberSearchText(m){const p=window.backendProfiles?.get?.(m.name)?.member||{};return [m.name,m.company,m.desc,p.expertise_category,p.services,p.common_problems,p.work_scope,p.tagline].filter(Boolean).join(' ').toLowerCase()}
+  function showMembers(list,prefix){addMsg(prefix||`找到 ${list.length} 位可能適合的成員：`);const body=document.getElementById('assistantBody');list.slice(0,6).forEach(m=>{const d=document.createElement('div');d.className='assistant-member';d.innerHTML=`<b>${m.name}｜${m.company||''}</b><span>${m.desc||''}</span><button data-member="${m.name}">查看人物</button>`;body.appendChild(d)});body.scrollTop=body.scrollHeight}
+  function findPeople(q){const x=q.toLowerCase();return (window.allMembers||[]).filter(m=>String(m.name||'').toLowerCase().includes(x)||String(m.company||'').toLowerCase().includes(x))}
+  function findProfession(q){const x=q.toLowerCase();return (window.allMembers||[]).filter(m=>memberSearchText(m).includes(x))}
+  function detectProblem(q){for(const [key,words] of problemMatchers){if(words.some(w=>q.includes(w)))return key}return''}
+  function membersByProblem(key){return (window.allMembers||[]).filter(m=>Array.isArray(m.problem_keys)&&m.problem_keys.includes(key))}
+  function handleIntent(key){currentIntent=key;track('chat_intent',{intent:key});if(key==='person_search')addMsg('請輸入姓名或公司名稱，例如：鍾師富、詠順工程行。');else if(key==='profession_search')addMsg('請輸入你要找的專業，例如：燈光、水電、窗簾、油漆。');else if(key==='problem_solve')addMsg('請直接描述問題，例如：牆壁漏水、水費突然變高、辦公室想重新裝修。');else{addMsg('沒問題，我先幫你縮小範圍。比較接近哪一類？');const body=document.getElementById('assistantBody');const box=document.createElement('div');box.className='assistant-choices';[['漏水／防水','water'],['裝修／翻修','renovation'],['水電／機電','electric'],['商業空間','commercial']].forEach(([label,key])=>box.insertAdjacentHTML('beforeend',`<button class="assistant-choice" data-problem="${key}">${label}</button>`));body.appendChild(box)}}
+  function handleText(q){q=q.trim();if(!q)return;addMsg(q,'user');track('chat_message',{intent:currentIntent,query_text:q});let list=[];
+    if(currentIntent==='person_search'){list=findPeople(q);if(list.length)return showMembers(list,'我找到這些成員：');return showFallback()}
+    if(currentIntent==='profession_search'){list=findProfession(q);if(list.length)return showMembers(list,'依你的專業需求，這些成員較相關：');return showFallback()}
+    const people=findPeople(q);if(people.length)return showMembers(people,'我找到你提到的人物：');
+    const key=detectProblem(q);if(key){list=membersByProblem(key);if(list.length)return showMembers(list,'依你描述的狀況，建議先從這些專業成員開始：')}
+    list=findProfession(q);if(list.length)return showMembers(list,'依你的描述，這些成員可能相關：');
+    showFallback();
+  }
+  function build(){if(document.getElementById('buildingAssistant'))return;document.body.insertAdjacentHTML('beforeend',`<button class="building-assistant-launcher" id="assistantLauncher">問建築小幫手</button><div class="building-assistant" id="buildingAssistant"><div class="assistant-head"><div><b>磐石砌好厝｜建築小幫手</b><small>找人、找專業、解決工程問題</small></div><button class="assistant-close" id="assistantClose">×</button></div><div class="assistant-body" id="assistantBody"></div><div class="assistant-input"><input id="assistantInput" placeholder="直接描述你的問題…"><button id="assistantSend">送出</button></div></div>`);
+    const panel=document.getElementById('buildingAssistant');document.getElementById('assistantLauncher').onclick=()=>{panel.classList.add('open');track('chat_open');if(!document.getElementById('assistantBody').children.length){addMsg('嗨，我是磐石砌好厝建築小幫手。\n你可以直接告訴我遇到的問題，或選擇你需要的服務。');showChoices()}};document.getElementById('assistantClose').onclick=()=>panel.classList.remove('open');document.getElementById('assistantSend').onclick=()=>{const i=document.getElementById('assistantInput');handleText(i.value);i.value=''};document.getElementById('assistantInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('assistantSend').click()}});
+    document.getElementById('assistantBody').addEventListener('click',e=>{const ib=e.target.closest('[data-intent]');if(ib){handleIntent(ib.dataset.intent);return}const pb=e.target.closest('[data-problem]');if(pb){const key=pb.dataset.problem;currentIntent='problem_solve';const list=membersByProblem(key);showMembers(list,'這類問題可以先從以下成員開始：');track('chat_problem_pick',{intent:key});return}const mb=e.target.closest('[data-member]');if(mb){track('chat_member_open',{member_name:mb.dataset.member,intent:currentIntent});window.openProfile?.(mb.dataset.member)}});
+    document.addEventListener('click',e=>{const contact=e.target.closest('.contact-action');if(contact){const name=document.getElementById('profileName')?.textContent?.trim()||'';track('contact_click',{member_name:name,meta:{label:contact.querySelector('.contact-type')?.textContent||''}})}const member=e.target.closest('.directory-card,.flow-person');if(member){const name=member.querySelector('.name')?.textContent?.trim()||'';if(name)track('member_card_click',{member_name:name})}})
+  }
+  window.addEventListener('DOMContentLoaded',()=>setTimeout(build,100));
+})();
+</script>
