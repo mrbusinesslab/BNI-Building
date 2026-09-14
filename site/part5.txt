@@ -9,32 +9,38 @@ const dynamicProcessConfig={
   water:[
     {title:'漏水檢測',note:'先找出漏水來源與問題位置',roles:['leak_detection','inspection']},
     {title:'水電檢查',note:'確認水管、給排水或設備是否異常',roles:['plumbing']},
-    {title:'泥作／防水修繕',note:'處理牆面、磁磚、防水或結構表面修補',roles:['masonry','waterproof_masonry']},
-    {title:'油漆收尾',note:'漏水問題處理後進行牆面復原',roles:['painting']}
+    {title:'泥作／防水修繕',note:'處理牆面、磁磚、防水或結構表面修補',roles:['masonry','waterproof_masonry']}
   ],
-  renovation:[
-    {title:'規劃／統包',note:'先確認需求、預算與整體施工安排',roles:['planning_gc','planning_design','planning_architect']},
-    {title:'拆除清運',note:'舊有裝修拆除與現場整理',roles:['demolition']},
-    {title:'水電／機電',note:'處理管線、配電、弱電與設備配置',roles:['plumbing','electrical','low_voltage','mep','green_energy','smart_lighting']},
-    {title:'泥作／防水',note:'處理基礎修繕、防水與牆地面工程',roles:['masonry','leak_detection','inspection','waterproof_masonry']},
-    {title:'木作／地板／廚房',note:'進入空間造作與設備整合',roles:['woodwork','flooring','kitchen']},
-    {title:'油漆收尾',note:'最後完成牆面與整體視覺收尾',roles:['painting']}
+  mep:[
+    {title:'水電施工',note:'處理住宅用水、用電與設備安裝',roles:['plumbing','electrical']},
+    {title:'機電／消防',note:'處理機電、消防、儀控與環控設備',roles:['mep']},
+    {title:'綠電／能源',note:'能源設備與機電整合',roles:['green_energy']}
+  ],
+  low_voltage:[
+    {title:'弱電／監視器／網路',note:'監視器、網路與弱電設備整合',roles:['low_voltage']}
+  ],
+  design:[
+    {title:'統包／整體工程',note:'整合需求、預算與整體施工安排',roles:['planning_gc']},
+    {title:'室內／空間設計',note:'住宅、商空與老屋的空間設計規劃',roles:['planning_design']},
+    {title:'建築規劃',note:'建築設計、監造與技術服務',roles:['planning_architect']}
+  ],
+  demolition_masonry:[
+    {title:'拆除／清運',note:'舊有裝修拆除、清運與現場整理',roles:['demolition']},
+    {title:'泥作／基礎修繕',note:'砌磚、打底、牆地面與修繕施工',roles:['masonry','waterproof_masonry']}
+  ],
+  wood_furniture:[
+    {title:'木作／家具',note:'木作、客製家具與空間配置',roles:['woodwork']},
+    {title:'木地板',note:'地板規劃、產品與施工服務',roles:['flooring']},
+    {title:'廚房／廚具',note:'廚具規劃與居家空間整合',roles:['kitchen']},
+    {title:'辦公家具',note:'辦公桌椅與辦公空間家具配置',roles:['office_furniture']}
+  ],
+  lighting_curtains:[
+    {title:'燈光／智慧照明',note:'照明配置、燈光設計與智慧控制',roles:['smart_lighting']},
+    {title:'窗簾／百葉',note:'採光、遮光、隱私與窗飾規劃',roles:['curtains']}
   ],
   paint:[
-    {title:'牆況檢查',note:'先判斷牆面是否有滲水或基底問題',roles:['leak_detection','inspection','waterproof_masonry']},
-    {title:'油漆翻新',note:'牆面修補、底漆與面漆施工',roles:['painting']}
-  ],
-  electric:[
-    {title:'水電施工',note:'處理住宅用水、用電與設備安裝',roles:['plumbing']},
-    {title:'弱電／智慧設備',note:'監視器、網路、智慧照明與控制',roles:['low_voltage','smart_lighting']},
-    {title:'機電／綠電',note:'較大型機電、消防、儀控與能源設備',roles:['electrical','mep','green_energy']}
-  ],
-  commercial:[
-    {title:'空間規劃',note:'先做商空設計、建築與整體工程規劃',roles:['planning_gc','planning_design','planning_architect']},
-    {title:'拆除／基礎工程',note:'拆除、泥作、防水與基礎檢測',roles:['demolition','masonry','leak_detection','inspection','waterproof_masonry']},
-    {title:'水電／機電／弱電',note:'配置用水、用電、機電與資訊設備',roles:['plumbing','electrical','low_voltage','mep','green_energy']},
-    {title:'木作／地板／廚房',note:'完成空間造作與設備配置',roles:['woodwork','flooring','kitchen']},
-    {title:'照明／油漆收尾',note:'完成燈光、智慧設備與視覺收尾',roles:['smart_lighting','painting']}
+    {title:'牆況檢查',note:'先確認牆面是否有滲水或基底問題',roles:['leak_detection','inspection','waterproof_masonry']},
+    {title:'油漆翻新',note:'牆面修補、粉刷與藝術漆施工',roles:['painting']}
   ]
 };
 
@@ -51,20 +57,18 @@ function renderDirectoryFromBackend(){
 renderMatchedMembers=function(key){
   if(key==='unknown'){
     matchCountEl.textContent=`目前顯示建築組全部 ${allMembers.length} 位專業成員`;
-    membersEl.innerHTML=`<div class="flow-group"><div class="flow-group-head"><div class="flow-step-no">?</div><div><div class="flow-role-title">先從全部專業成員找方向</div><div class="flow-role-sub">還不知道該找誰時，可以先看每位成員的專業定位</div></div></div><div class="all-members-group">${allMembers.map(routePersonCard).join('')}</div></div>`;
+    membersEl.innerHTML=`<div class="flow-group"><div class="flow-group-head"><div class="flow-step-no">?</div><div><div class="flow-role-title">先從全部專業成員找方向</div><div class="flow-role-sub">還不知道該找誰時，可以直接使用建築小幫手描述你的問題</div></div></div><div class="all-members-group">${allMembers.map(routePersonCard).join('')}</div></div>`;
     return;
   }
-  const eligible=allMembers.filter(m=>memberProblems(m).includes(key));
   const configs=dynamicProcessConfig[key]||[];
+  const eligible=allMembers.filter(m=>configs.some(cfg=>memberRoles(m).some(r=>cfg.roles.includes(r))));
   const used=new Set();
   const groups=[];
   configs.forEach(cfg=>{
-    const people=eligible.filter(m=>memberRoles(m).some(r=>cfg.roles.includes(r)));
+    const people=eligible.filter(m=>memberRoles(m).some(r=>cfg.roles.includes(r))&&!used.has(m.name));
     people.forEach(m=>used.add(m.name));
     if(people.length)groups.push({...cfg,people});
   });
-  const other=eligible.filter(m=>!used.has(m.name));
-  if(other.length)groups.push({title:'其他相關專業',note:'此成員已被設定可協助這類問題',people:other});
   matchCountEl.textContent=`依處理流程分成 ${groups.length} 個階段，共 ${eligible.length} 位適合人選`;
   membersEl.innerHTML=groups.length?groups.map((g,idx)=>`<div class="flow-group"><div class="flow-group-head"><div class="flow-step-no">${idx+1}</div><div><div class="flow-role-title">${g.title}</div><div class="flow-role-sub">${g.note}</div></div></div><div class="flow-members">${g.people.map(routePersonCard).join('')}</div></div>${idx<groups.length-1?'<div class="flow-connector">↓</div>':''}`).join(''):'<div class="matched-empty">目前尚未設定可處理這類問題的成員。</div>';
 };
