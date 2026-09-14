@@ -7,15 +7,27 @@
 <script>
 (function(){
   let currentIntent='';
-  const intentButtons=[
-    ['找人','person_search'],['找專業','profession_search'],['解決問題','problem_solve'],['我不知道該找誰','guided_help']
-  ];
+  const intentButtons=[['找人','person_search'],['找專業','profession_search'],['解決問題','problem_solve'],['我不知道該找誰','guided_help']];
   const problemMatchers=[
     ['water',['漏水','滲水','水費','壁癌','發霉','滴水','防水']],
     ['paint',['油漆','粉刷','牆面','脫漆','掉漆']],
     ['electric',['水電','插座','電線','跳電','監視器','網路','燈光','照明','機電']],
     ['renovation',['裝潢','裝修','翻修','老屋','統包','拆除','木作','地板','廚房']],
     ['commercial',['辦公室','商空','店面','商業空間','公司裝修']]
+  ];
+  const roleMatchers=[
+    {words:['辦公椅','椅子','辦公桌','桌椅','辦公家具','oa家具','oa辦公家具'],roles:['office_furniture']},
+    {words:['窗簾','百葉窗','百葉'],roles:['curtains']},
+    {words:['漏水','滲水','水費','壁癌','抓漏','防水'],roles:['leak_detection','inspection','waterproof_masonry','plumbing']},
+    {words:['油漆','粉刷','脫漆','掉漆'],roles:['painting']},
+    {words:['燈光','照明','燈具'],roles:['smart_lighting']},
+    {words:['水電','水管','插座','電線'],roles:['plumbing','electrical']},
+    {words:['監視器','弱電','網路'],roles:['low_voltage']},
+    {words:['木作','木工'],roles:['woodwork']},
+    {words:['地板','木地板'],roles:['flooring']},
+    {words:['廚房','廚具'],roles:['kitchen']},
+    {words:['拆除','清運'],roles:['demolition']},
+    {words:['室內設計','空間設計','設計師'],roles:['planning_design']}
   ];
   function getMembers(){return typeof allMembers!=='undefined'&&Array.isArray(allMembers)?allMembers:[]}
   function getBackendProfile(name){return typeof backendProfiles!=='undefined'&&backendProfiles?.get?backendProfiles.get(name):null}
@@ -26,16 +38,40 @@
   function memberSearchText(m){const p=getBackendProfile(m.name)?.member||{};return [m.name,m.company,m.desc,p.expertise_category,p.services,p.common_problems,p.work_scope,p.tagline].filter(Boolean).join(' ').toLowerCase()}
   function showMembers(list,prefix){addMsg(prefix||`找到 ${list.length} 位可能適合的成員：`);const body=document.getElementById('assistantBody');list.slice(0,6).forEach(m=>{const d=document.createElement('div');d.className='assistant-member';d.innerHTML=`<b>${m.name}｜${m.company||''}</b><span>${m.desc||''}</span><button data-member="${m.name}">查看人物</button>`;body.appendChild(d)});body.scrollTop=body.scrollHeight}
   function findPeople(q){const x=q.toLowerCase();return getMembers().filter(m=>String(m.name||'').toLowerCase().includes(x)||String(m.company||'').toLowerCase().includes(x))}
-  function findProfession(q){const x=q.toLowerCase();return getMembers().filter(m=>memberSearchText(m).includes(x))}
+  function findRoleMatches(q){
+    const x=q.toLowerCase();
+    const roles=[];
+    roleMatchers.forEach(r=>{if(r.words.some(w=>x.includes(w)))r.roles.forEach(role=>{if(!roles.includes(role))roles.push(role)})});
+    if(!roles.length)return[];
+    return getMembers().filter(m=>Array.isArray(m.role_keys)&&m.role_keys.some(r=>roles.includes(r))).sort((a,b)=>{
+      const ar=a.role_keys?.findIndex(r=>roles.includes(r))??99,br=b.role_keys?.findIndex(r=>roles.includes(r))??99;return ar-br;
+    });
+  }
+  function findProfession(q){
+    const x=q.toLowerCase().replace(/\s+/g,'');
+    const direct=getMembers().filter(m=>memberSearchText(m).replace(/\s+/g,'').includes(x));
+    if(direct.length)return direct;
+    const tokens=[...new Set(q.toLowerCase().split(/[\s、，,。\/｜]+/).map(s=>s.trim()).filter(s=>s.length>=2&&!['我要','我想','幫我','請問','找人','找專業','辦公室'].includes(s)))];
+    if(!tokens.length)return[];
+    return getMembers().map(m=>({m,score:tokens.reduce((n,t)=>n+(memberSearchText(m).includes(t)?1:0),0)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).map(x=>x.m);
+  }
   function detectProblem(q){for(const [key,words] of problemMatchers){if(words.some(w=>q.includes(w)))return key}return''}
-  function membersByProblem(key){return getMembers().filter(m=>Array.isArray(m.problem_keys)&&m.problem_keys.includes(key))}
-  function handleIntent(key){currentIntent=key;track('chat_intent',{intent:key});if(key==='person_search')addMsg('請輸入姓名或公司名稱，例如：鍾師富、詠順工程行。');else if(key==='profession_search')addMsg('請輸入你要找的專業，例如：燈光、水電、窗簾、油漆。');else if(key==='problem_solve')addMsg('請直接描述問題，例如：牆壁漏水、水費突然變高、辦公室想重新裝修。');else{addMsg('沒問題，我先幫你縮小範圍。比較接近哪一類？');const body=document.getElementById('assistantBody');const box=document.createElement('div');box.className='assistant-choices';[['漏水／防水','water'],['裝修／翻修','renovation'],['水電／機電','electric'],['商業空間','commercial']].forEach(([label,key])=>box.insertAdjacentHTML('beforeend',`<button class="assistant-choice" data-problem="${key}">${label}</button>`));body.appendChild(box)}}
-  function handleText(q){q=q.trim();if(!q)return;addMsg(q,'user');track('chat_message',{intent:currentIntent,query_text:q});let list=[];
+  function membersByProblem(key){
+    const primary={water:['leak_detection','inspection','plumbing','waterproof_masonry','masonry'],paint:['painting'],electric:['plumbing','electrical','low_voltage','smart_lighting','mep','green_energy'],renovation:['planning_gc','planning_design','planning_architect','demolition','woodwork','flooring','kitchen','masonry'],commercial:['planning_gc','planning_design','planning_architect','office_furniture','low_voltage','mep','smart_lighting']}[key]||[];
+    const members=getMembers().filter(m=>Array.isArray(m.problem_keys)&&m.problem_keys.includes(key));
+    if(!primary.length)return members;
+    const ranked=members.map(m=>({m,score:Math.max(...(m.role_keys||[]).map(r=>primary.includes(r)?primary.length-primary.indexOf(r):0),0)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).map(x=>x.m);
+    return ranked.length?ranked:members;
+  }
+  function handleIntent(key){currentIntent=key;track('chat_intent',{intent:key});if(key==='person_search')addMsg('請輸入姓名或公司名稱，例如：鍾師富、詠順工程行。');else if(key==='profession_search')addMsg('請輸入你要找的專業，例如：燈光、水電、窗簾、辦公家具。');else if(key==='problem_solve')addMsg('請直接描述問題，例如：牆壁漏水、水費突然變高、辦公室想重新裝修。');else{addMsg('沒問題，我先幫你縮小範圍。比較接近哪一類？');const body=document.getElementById('assistantBody');const box=document.createElement('div');box.className='assistant-choices';[['漏水／防水','water'],['裝修／翻修','renovation'],['水電／機電','electric'],['商業空間','commercial']].forEach(([label,key])=>box.insertAdjacentHTML('beforeend',`<button class="assistant-choice" data-problem="${key}">${label}</button>`));body.appendChild(box)}}
+  function handleText(q){
+    q=q.trim();if(!q)return;addMsg(q,'user');track('chat_message',{intent:currentIntent,query_text:q});let list=[];
     if(currentIntent==='person_search'){list=findPeople(q);if(list.length)return showMembers(list,'我找到這些成員：');return showFallback()}
-    if(currentIntent==='profession_search'){list=findProfession(q);if(list.length)return showMembers(list,'依你的專業需求，這些成員較相關：');return showFallback()}
     const people=findPeople(q);if(people.length)return showMembers(people,'我找到你提到的人物：');
+    list=findRoleMatches(q);if(list.length)return showMembers(list,currentIntent==='profession_search'?'依你的專業需求，最相關的是：':'依你描述的需求，優先建議這些專業成員：');
+    if(currentIntent==='profession_search'){list=findProfession(q);if(list.length)return showMembers(list,'依你的專業需求，這些成員較相關：');return showFallback()}
+    list=findProfession(q);if(list.length&&q.length>=2)return showMembers(list,'依你的描述，這些成員可能相關：');
     const key=detectProblem(q);if(key){list=membersByProblem(key);if(list.length)return showMembers(list,'依你描述的狀況，建議先從這些專業成員開始：')}
-    list=findProfession(q);if(list.length)return showMembers(list,'依你的描述，這些成員可能相關：');
     showFallback();
   }
   function build(){if(document.getElementById('buildingAssistant'))return;document.body.insertAdjacentHTML('beforeend',`<button class="building-assistant-launcher" id="assistantLauncher">問建築小幫手</button><div class="building-assistant" id="buildingAssistant"><div class="assistant-head"><div><b>磐石砌好厝｜建築小幫手</b><small>找人、找專業、解決工程問題</small></div><button class="assistant-close" id="assistantClose">×</button></div><div class="assistant-body" id="assistantBody"></div><div class="assistant-input"><input id="assistantInput" placeholder="直接描述你的問題…"><button id="assistantSend">送出</button></div></div>`);
