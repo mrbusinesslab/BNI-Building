@@ -1,0 +1,37 @@
+name: Fix visibility toggle lag
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-visibility-toggle-lag.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch admin visibility switch
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('admin/index.html')
+          s=p.read_text()
+          old="""function refreshVisibilityUi(){if(!current)return;const visible=current.is_published!==false;const sw=$('memberVisibilitySwitch');if(sw)sw.checked=visible;const label=$('memberVisibilityLabel');if(label)label.textContent=visible?'前台顯示':'前台隱藏'}
+$('memberVisibilitySwitch').onchange=async e=>{if(!current)return;const next=!!e.currentTarget.checked;e.currentTarget.disabled=true;const {data,error}=await sb.from('bni_members').update({is_published:next}).eq('id',current.id).select().single();e.currentTarget.disabled=false;if(error){refreshVisibilityUi();return note($('globalNotice'),'更新顯示狀態失敗：'+error.message,'error')}current=data;members=members.map(x=>x.id===data.id?data:x);refreshVisibilityUi();note($('globalNotice'),next?'已恢復前台顯示。':'已隱藏此人員，所有資料與紀錄仍保留。');await loadMembers()};"""
+          new="""let visibilityTimer=null,visibilitySeq=0;
+function refreshVisibilityUi(){if(!current)return;const visible=current.is_published!==false;const sw=$('memberVisibilitySwitch');if(sw)sw.checked=visible;const label=$('memberVisibilityLabel');if(label)label.textContent=visible?'前台顯示':'前台隱藏'}
+function syncMemberVisibilityInList(member){const item=document.querySelector(`.member-item[data-id=\"${member.id}\"]`);if(!item)return;const hidden=member.is_published===false;item.classList.toggle('member-hidden',hidden);const status=item.querySelector('.member-status');if(status){status.className=`member-status ${hidden?'hidden-status':'visible'}`;status.textContent=hidden?'前台隱藏':'前台顯示'}}
+$('memberVisibilitySwitch').onchange=e=>{if(!current)return;const sw=e.currentTarget,next=!!sw.checked,memberId=current.id,prev=current.is_published!==false;current={...current,is_published:next};members=members.map(x=>x.id===memberId?{...x,is_published:next}:x);refreshVisibilityUi();syncMemberVisibilityInList(current);clearTimeout(visibilityTimer);const seq=++visibilitySeq;visibilityTimer=setTimeout(async()=>{const {data,error}=await sb.from('bni_members').update({is_published:next}).eq('id',memberId).select().single();if(seq!==visibilitySeq)return;if(error){current={...current,is_published:prev};members=members.map(x=>x.id===memberId?{...x,is_published:prev}:x);refreshVisibilityUi();syncMemberVisibilityInList(current);return note($('globalNotice'),'更新顯示狀態失敗：'+error.message,'error')}current=data;members=members.map(x=>x.id===data.id?data:x);refreshVisibilityUi();syncMemberVisibilityInList(data);note($('globalNotice'),next?'已恢復前台顯示。':'已隱藏此人員，所有資料與紀錄仍保留。')},180)};"""
+          if old not in s:
+              raise SystemExit('target block not found')
+          p.write_text(s.replace(old,new))
+          PY
+      - name: Remove one-time workflow
+        run: rm .github/workflows/fix-visibility-toggle-lag.yml
+      - name: Commit
+        run: |
+          git config user.name 'openai-codex'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add admin/index.html .github/workflows/fix-visibility-toggle-lag.yml
+          git commit -m 'Make member visibility switch responsive'
+          git push
