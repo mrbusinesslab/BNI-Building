@@ -1,70 +1,14 @@
 (function(){
   const SAVE_IDS=new Set(['saveMemberBtn','saveCaseBtn','saveCollabBtn','saveContactBtn','saveCategoryBtn']);
   let activeBtn=null,timer=null,lastState='';
-
   const style=document.createElement('style');
-  style.textContent=`
-    #adminSaveStatus{position:fixed;right:22px;top:22px;z-index:99999;display:none;align-items:center;gap:10px;min-width:170px;max-width:min(360px,calc(100vw - 28px));padding:12px 15px;border-radius:12px;background:#fff;border:1px solid #d7e4e8;box-shadow:0 12px 32px rgba(23,50,61,.18);font:800 14px/1.35 -apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC','Microsoft JhengHei',sans-serif;color:#17323d}
-    #adminSaveStatus.show{display:flex}
-    #adminSaveStatus.saving{border-color:#b9d4dd;color:#00465f}
-    #adminSaveStatus.success{border-color:#a9d8bd;color:#17663a}
-    #adminSaveStatus.error{border-color:#e7b5b5;color:#a52a2a}
-    #adminSaveStatus .save-status-icon{width:20px;height:20px;display:grid;place-items:center;flex:0 0 20px;font-size:16px}
-    #adminSaveStatus.saving .save-status-icon{border:2px solid #b9d4dd;border-top-color:#00465f;border-radius:50%;font-size:0;animation:adminSaveSpin .7s linear infinite}
-    @keyframes adminSaveSpin{to{transform:rotate(360deg)}}
-    .admin-saving-btn{opacity:.68!important;pointer-events:none!important}
-    @media(max-width:820px){#adminSaveStatus{top:12px;right:12px;left:12px;max-width:none}}
-  `;
+  style.textContent=`#adminSaveStatus{position:fixed;right:22px;top:22px;z-index:99999;display:none;align-items:center;gap:10px;min-width:170px;max-width:min(360px,calc(100vw - 28px));padding:12px 15px;border-radius:12px;background:#fff;border:1px solid #d7e4e8;box-shadow:0 12px 32px rgba(23,50,61,.18);font:800 14px/1.35 -apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC','Microsoft JhengHei',sans-serif;color:#17323d}#adminSaveStatus.show{display:flex}#adminSaveStatus.saving{border-color:#b9d4dd;color:#00465f}#adminSaveStatus.success{border-color:#a9d8bd;color:#17663a}#adminSaveStatus.error{border-color:#e7b5b5;color:#a52a2a}#adminSaveStatus .save-status-icon{width:20px;height:20px;display:grid;place-items:center;flex:0 0 20px;font-size:16px}#adminSaveStatus.saving .save-status-icon{border:2px solid #b9d4dd;border-top-color:#00465f;border-radius:50%;font-size:0;animation:adminSaveSpin .7s linear infinite}@keyframes adminSaveSpin{to{transform:rotate(360deg)}}.admin-saving-btn{opacity:.68!important;pointer-events:none!important}@media(max-width:820px){#adminSaveStatus{top:12px;right:12px;left:12px;max-width:none}}`;
   document.head.appendChild(style);
-
-  const box=document.createElement('div');
-  box.id='adminSaveStatus';
-  box.setAttribute('role','status');
-  box.setAttribute('aria-live','polite');
-  box.innerHTML='<span class="save-status-icon"></span><span class="save-status-text"></span>';
-  document.body.appendChild(box);
-
-  function releaseButton(){
-    if(activeBtn){activeBtn.classList.remove('admin-saving-btn');activeBtn.disabled=false;activeBtn=null}
-  }
-  function setStatus(state,text){
-    lastState=state;
-    clearTimeout(timer);
-    box.className='show '+state;
-    box.querySelector('.save-status-icon').textContent=state==='success'?'✓':state==='error'?'!':'';
-    box.querySelector('.save-status-text').textContent=text;
-    if(state!=='saving'){
-      releaseButton();
-      timer=setTimeout(()=>{box.className='';lastState=''},state==='error'?5000:3000);
-    }
-  }
-  function begin(btn){
-    releaseButton();
-    activeBtn=btn;
-    btn.disabled=true;
-    btn.classList.add('admin-saving-btn');
-    setStatus('saving','儲存中，請稍候…');
-    timer=setTimeout(()=>{
-      if(lastState==='saving')setStatus('error','儲存時間較久，請確認網路後再試一次。');
-    },30000);
-  }
-
-  document.addEventListener('click',e=>{
-    const btn=e.target.closest('button');
-    if(btn&&SAVE_IDS.has(btn.id))begin(btn);
-  },true);
-
-  function readNotice(){
-    if(lastState!=='saving')return;
-    const notice=document.getElementById('globalNotice');
-    if(!notice)return;
-    const text=(notice.textContent||'').trim();
-    if(!text)return;
-    const error=notice.querySelector('.notice.error')||/失敗|錯誤|請輸入|找不到|無法/.test(text);
-    if(error)setStatus('error',text);
-    else if(/已儲存|儲存成功|已更新|已新增|完成/.test(text))setStatus('success','✓ 儲存成功');
-  }
-
-  const notice=document.getElementById('globalNotice');
-  if(notice)new MutationObserver(readNotice).observe(notice,{childList:true,subtree:true,characterData:true});
+  const box=document.createElement('div');box.id='adminSaveStatus';box.setAttribute('role','status');box.setAttribute('aria-live','polite');box.innerHTML='<span class="save-status-icon"></span><span class="save-status-text"></span>';document.body.appendChild(box);
+  function releaseButton(){if(activeBtn){activeBtn.classList.remove('admin-saving-btn');activeBtn=null}}
+  function setStatus(state,text){lastState=state;clearTimeout(timer);box.className='show '+state;box.querySelector('.save-status-icon').textContent=state==='success'?'✓':state==='error'?'!':'';box.querySelector('.save-status-text').textContent=text;if(state!=='saving'){releaseButton();timer=setTimeout(()=>{box.className='';lastState=''},state==='error'?5000:3000)}}
+  function begin(btn){releaseButton();activeBtn=btn;btn.classList.add('admin-saving-btn');setStatus('saving','儲存中，請稍候…');timer=setTimeout(()=>{if(lastState==='saving')setStatus('error','儲存時間較久，請確認網路後再試一次。')},30000)}
+  document.addEventListener('click',e=>{const btn=e.target.closest('button');if(btn&&SAVE_IDS.has(btn.id))begin(btn)},true);
+  function readNotice(){if(lastState!=='saving')return;const notice=document.getElementById('globalNotice');if(!notice)return;const text=(notice.textContent||'').trim();if(!text)return;const error=notice.querySelector('.notice.error')||/失敗|錯誤|請輸入|找不到|無法/.test(text);if(error)setStatus('error',text);else if(/已儲存|儲存成功|已更新|已新增|完成/.test(text))setStatus('success','儲存成功')}
+  const notice=document.getElementById('globalNotice');if(notice)new MutationObserver(readNotice).observe(notice,{childList:true,subtree:true,characterData:true});
 })();
