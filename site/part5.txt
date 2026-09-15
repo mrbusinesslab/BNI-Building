@@ -5,6 +5,7 @@ const PUBLIC_SB_KEY='sb_publishable_Jrp7cxW-ppSJtrk-lScZjA_blNEnBRG';
 const publicSb=supabase.createClient(PUBLIC_SB_URL,PUBLIC_SB_KEY,{auth:{persistSession:false}});
 const backendProfiles=new Map();
 const needMemberIds=new Map();
+const needStepMembers=new Map();
 
 const dynamicProcessConfig={
   water:[
@@ -58,6 +59,16 @@ renderMatchedMembers=function(key){
     matchCountEl.textContent=`目前顯示建築組全部 ${allMembers.length} 位專業成員`;
     membersEl.innerHTML=`<div class="flow-group"><div class="flow-group-head"><div class="flow-step-no">?</div><div><div class="flow-role-title">先從全部專業成員找方向</div><div class="flow-role-sub">還不知道該找誰時，可以直接使用建築小幫手描述你的問題</div></div></div><div class="all-members-group">${allMembers.map(routePersonCard).join('')}</div></div>`;return;
   }
+  const stepRows=needStepMembers.get(key)||[];
+  if(stepRows.length){
+    const d=needsData.find(x=>x.key===key),steps=d?.steps||[];
+    const byIndex=new Map();stepRows.forEach(r=>{if(!byIndex.has(r.step_index))byIndex.set(r.step_index,[]);byIndex.get(r.step_index).push(r)});
+    const groups=steps.map((title,idx)=>{const ids=(byIndex.get(idx)||[]).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(r=>r.member_id);return{title,note:'由後台指定此步驟負責成員',people:ids.map(id=>allMembers.find(m=>m.id===id)).filter(Boolean)}}).filter(g=>g.people.length);
+    const uniq=new Set(stepRows.map(r=>r.member_id));
+    matchCountEl.textContent=`目前配對 ${uniq.size} 位適合人選`;
+    membersEl.innerHTML=groups.length?groups.map((g,idx)=>`<div class="flow-group"><div class="flow-group-head"><div class="flow-step-no">${idx+1}</div><div><div class="flow-role-title">${g.title}</div><div class="flow-role-sub">${g.note}</div></div></div><div class="flow-members">${g.people.map(routePersonCard).join('')}</div></div>${idx<groups.length-1?'<div class="flow-connector">↓</div>':''}`).join(''):'<div class="matched-empty">目前尚未設定此類別的步驟配對成員。</div>';
+    return;
+  }
   const mappedIds=needMemberIds.get(key)||[];
   const eligible=mappedIds.length?allMembers.filter(m=>mappedIds.includes(m.id)):allMembers.filter(m=>memberProblems(m).includes(key));
   const configs=dynamicProcessConfig[key]||[];
@@ -70,13 +81,14 @@ renderMatchedMembers=function(key){
 };
 
 async function loadBackendProfiles(){
-  const [mr,cr,br,tr,nr,nmr]=await Promise.all([
+  const [mr,cr,br,tr,nr,nmr,smr]=await Promise.all([
     publicSb.from('bni_members').select('*').eq('is_published',true).order('sort_order'),
     publicSb.from('bni_member_cases').select('*').eq('is_published',true).order('sort_order'),
     publicSb.from('bni_member_collaborations').select('*').eq('is_published',true).order('sort_order'),
     publicSb.from('bni_member_contacts').select('*').eq('is_published',true).order('sort_order'),
     publicSb.from('bni_need_categories').select('*').eq('is_active',true).order('sort_order'),
-    publicSb.from('bni_need_members').select('*').order('sort_order')
+    publicSb.from('bni_need_members').select('*').order('sort_order'),
+    publicSb.from('bni_need_step_members').select('*').order('step_index').order('sort_order')
   ]);
   if(mr.error){console.warn('Supabase 成員讀取失敗',mr.error);return}
   const members=mr.data||[],cases=cr.data||[],collabs=br.data||[],contacts=tr.data||[];
@@ -89,6 +101,7 @@ async function loadBackendProfiles(){
   members.forEach(m=>{if(m.card_json_url){discoveredCardJsonUrls[m.name]=m.card_json_url;enabledProfiles.add(m.name)}const p=backendProfiles.get(m.name);if((m.intro||'').trim()||p.cases.length||p.collabs.length||p.contacts.length)enabledProfiles.add(m.name)});
   if(!nr.error&&(nr.data||[]).length){needsData.splice(0,needsData.length,...nr.data.map(x=>({key:x.key,icon:x.icon||'•',title:x.title||'',small:x.small||'',text:x.description||'',steps:Array.isArray(x.steps)?x.steps:[]})))}
   needMemberIds.clear();if(!nmr.error)(nmr.data||[]).forEach(x=>{if(!needMemberIds.has(x.need_key))needMemberIds.set(x.need_key,[]);needMemberIds.get(x.need_key).push(x.member_id)});
+  needStepMembers.clear();if(!smr.error)(smr.data||[]).forEach(x=>{if(!needStepMembers.has(x.need_key))needStepMembers.set(x.need_key,[]);needStepMembers.get(x.need_key).push(x)});
   renderDirectoryFromBackend();
   const preferred=needsData.some(x=>x.key===currentNeedKey)?currentNeedKey:(needsData[0]?.key||'water');selectNeed(preferred,false);
 }
