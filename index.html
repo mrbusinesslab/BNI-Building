@@ -17,10 +17,61 @@
       '<div class="brandmark">建</div>',
       '<div class="brandmark"><img src="logo.png" alt="磐石砌好厝 Logo" style="width:42px;height:42px;object-fit:cover;border-radius:12px;display:block"></div>'
     );
+    page=page.replace(
+      '<a class="tag" href="https://mrbusinesslab.github.io/BNI-Building/admin/" style="text-decoration:none">後台管理</a>',
+      '<a class="tag admin-edit-link" href="https://mrbusinesslab.github.io/BNI-Building/admin/" aria-label="編輯內容" title="編輯內容" style="text-decoration:none">✎</a>'
+    );
+    page=page.replace('MR BUSINESS LAB｜建築組產業入口概念版','MR BUSINESS LAB｜磐石砌好厝');
+    page=page.replace('<body>','<body class="data-pending">');
     page=page.replaceAll('由後台指定此步驟負責成員','');
     page=page.replaceAll('此成員已由後台設定為此類別的配對人選','');
     page=page.replaceAll('目前尚未設定此類別的步驟配對成員。','目前尚無推薦人選。');
-    page=page.replace('</head>','<style>.flow-role-sub:empty{display:none}</style></head>');
+    page=page.replace('</head>',`<style>
+      .flow-role-sub:empty{display:none}
+      .admin-edit-link{width:38px;height:38px;padding:0!important;display:grid!important;place-items:center;font-size:21px!important;line-height:1;border-radius:50%!important}
+      body.data-pending .needs,body.data-pending .solution,body.data-pending .match-zone,body.data-pending .directory-section{visibility:hidden}
+      body.data-pending .section:has(.needs)::after{content:'需求載入中…';display:block;color:#6b7b82;font-size:14px;padding:18px 0}
+    </style></head>`);
+    page=page.replace('</body>',`<script>
+(function(){
+  const currentNeedKeys=['commercial_space','home_planning','office_planning','home_repair','soft_furnishing','old_house_renovation'];
+  const currentNeedLabels={commercial_space:'商空規劃',home_planning:'住家規劃',office_planning:'辦公室規劃',home_repair:'居家修繕',soft_furnishing:'軟裝家具',old_house_renovation:'老屋翻修'};
+  let ready=false;
+  function revealWhenReady(){
+    if(typeof needsData!=='undefined'&&currentNeedKeys.some(k=>needsData.some(n=>n.key===k))){ready=true;document.body.classList.remove('data-pending');return true}
+    return false;
+  }
+  window.addEventListener('DOMContentLoaded',()=>{
+    const timer=setInterval(()=>{if(revealWhenReady())clearInterval(timer)},80);
+    setTimeout(()=>{if(!ready){document.body.classList.remove('data-pending');clearInterval(timer)}},5000);
+  });
+
+  document.addEventListener('click',e=>{
+    const unknown=e.target.closest('[data-need-key="unknown"]');
+    if(unknown&&typeof selectNeed==='function')selectNeed('unknown',false);
+  },true);
+
+  function showCurrentNeedChoices(){
+    const body=document.getElementById('assistantBody');if(!body)return;
+    const msg=document.createElement('div');msg.className='assistant-msg bot';msg.textContent='你目前比較接近哪一種需求？';body.appendChild(msg);
+    const box=document.createElement('div');box.className='assistant-choices';
+    box.innerHTML=currentNeedKeys.map(k=>'<button class="assistant-choice" data-current-need="'+k+'">'+currentNeedLabels[k]+'</button>').join('');
+    body.appendChild(box);body.scrollTop=body.scrollHeight;
+  }
+  document.addEventListener('click',e=>{
+    const guided=e.target.closest('.assistant-choice[data-intent="guided_help"]');
+    if(guided){e.preventDefault();e.stopImmediatePropagation();showCurrentNeedChoices();return}
+    const btn=e.target.closest('.assistant-choice[data-current-need]');
+    if(btn){
+      e.preventDefault();e.stopImmediatePropagation();
+      const key=btn.dataset.currentNeed;
+      if(typeof selectNeed==='function')selectNeed(key,true);
+      const panel=document.getElementById('buildingAssistant');if(panel)panel.classList.remove('open');
+      setTimeout(()=>document.querySelector('.match-zone')?.scrollIntoView({behavior:'smooth',block:'start'}),50);
+    }
+  },true);
+})();
+<\/script></body>`);
     document.open();
     document.write(page);
     document.close();
