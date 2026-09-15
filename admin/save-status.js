@@ -11,5 +11,4 @@
   document.addEventListener('click',e=>{const btn=e.target.closest('button');if(btn&&SAVE_IDS.has(btn.id))begin(btn)},true);
   function readNotice(){if(lastState!=='saving')return;const notice=document.getElementById('globalNotice');if(!notice)return;const text=(notice.textContent||'').trim();if(!text)return;const error=notice.querySelector('.notice.error')||/失敗|錯誤|請輸入|找不到|無法/.test(text);if(error)setStatus('error',text);else if(/已儲存|儲存成功|已更新|已新增|已同步到前台|已同步|完成/.test(text))setStatus('success','儲存成功')}
   const notice=document.getElementById('globalNotice');if(notice)new MutationObserver(readNotice).observe(notice,{childList:true,subtree:true,characterData:true});
-  if(!document.querySelector('script[src^="./admin-ux.js"]')){const s=document.createElement('script');s.src='./admin-ux.js?v=20260915-1930';document.body.appendChild(s)}
 })();
