@@ -11,5 +11,5 @@ renderCategoryList=function(){
   el.querySelectorAll('[data-category]').forEach(b=>b.onclick=()=>selectCategory(b.dataset.category));
 };
 const style=document.createElement('style');style.textContent=`#categoryList{gap:0}.category-group{display:grid;gap:7px;margin-bottom:18px}.category-group:last-child{margin-bottom:0}.category-group-head{display:grid;gap:2px;padding:9px 10px 7px;border-bottom:1px solid #dfe8eb}.category-group-head b{font-size:12px;color:#123d4d}.category-group-head span{font-size:10px;color:var(--muted)}.category-group-visible .category-group-head{border-left:3px solid #0b5870}.category-group-hidden .category-group-head{border-left:3px solid #9aa8ad}`;document.head.appendChild(style);
-if(!document.querySelector('script[src^="./visibility-ui.js"]')){const s=document.createElement('script');s.src='./visibility-ui.js?v=20260915-1830';document.body.appendChild(s)}
+if(!document.querySelector('script[src^="./visibility-ui.js"]')){const s=document.createElement('script');s.src='./visibility-ui.js?v=20260915-1900';document.body.appendChild(s)}
 })();
