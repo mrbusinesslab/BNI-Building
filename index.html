@@ -17,6 +17,10 @@
       '<div class="brandmark">建</div>',
       '<div class="brandmark"><img src="logo.png" alt="磐石砌好厝 Logo" style="width:42px;height:42px;object-fit:cover;border-radius:12px;display:block"></div>'
     );
+    page=page.replaceAll('由後台指定此步驟負責成員','');
+    page=page.replaceAll('此成員已由後台設定為此類別的配對人選','');
+    page=page.replaceAll('目前尚未設定此類別的步驟配對成員。','目前尚無推薦人選。');
+    page=page.replace('</head>','<style>.flow-role-sub:empty{display:none}</style></head>');
     document.open();
     document.write(page);
     document.close();
