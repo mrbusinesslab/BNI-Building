@@ -6,6 +6,7 @@
 
   const style=document.createElement('style');
   style.textContent=`
+    .page > .page-head > div > h2{display:none}
     #adminDirtyState{position:fixed;right:22px;bottom:22px;z-index:99990;display:none;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;background:#fff7df;border:1px solid #e8d49a;color:#785b12;box-shadow:0 8px 24px rgba(23,50,61,.12);font:800 12px/1.2 -apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC','Microsoft JhengHei',sans-serif}
     #adminDirtyState.show{display:flex}#adminDirtyState i{width:7px;height:7px;border-radius:50%;background:#c48a00;display:block}
     #stepConfirmGuard{display:none;margin:10px 0 4px;padding:12px 13px;border:1px solid #e3c875;background:#fff9e8;border-radius:12px;color:#6f5714;font-size:13px;line-height:1.5}
