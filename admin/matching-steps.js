@@ -8,7 +8,7 @@ let orderLoadedKey=null;
 let dragCategoryKey=null;
 const NEW_KEY='__new_category__';
 function esc2(v=''){return String(v).replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[s]))}
-function ensureCss(){if(document.querySelector('link[href^="./matching-steps.css"]'))return;const l=document.createElement('link');l.rel='stylesheet';l.href='./matching-steps.css?v=20260915-1535';document.head.appendChild(l)}
+function ensureCss(){if(document.querySelector('link[href^="./matching-steps.css"]'))return;const l=document.createElement('link');l.rel='stylesheet';l.href='./matching-steps.css?v=20260915-1545';document.head.appendChild(l)}
 function stepNames(){return (qs('cat_steps')?.value||'').split('\n').map(x=>x.trim()).filter(Boolean)}
 function memberById(id){return members.find(m=>m.id===id)}
 function sourceCards(){return members.map(m=>`<div class="drag-member" draggable="true" data-drag-member="${m.id}"><b>${m.member_no||'-'}｜${esc2(m.name)}</b><span>${esc2(m.company||'')}</span></div>`).join('')}
@@ -37,5 +37,6 @@ async function saveAll(){let key=val('cat_key').toLowerCase().replace(/\s+/g,'_'
  notice('類別、顯示順序、步驟與人物配對已同步到前台。');loadedKey=null;orderLoadedKey=null;await loadCategories();selectCategory(targetKey);setTimeout(()=>{loadStepMap();renderOrderPreview()},0)
 }
 function wire(){ensureCss();const editor=qs('categoryEditor'),box=qs('categoryMemberPicks'),save=qs('saveCategoryBtn'),steps=qs('cat_steps');if(!editor||!box||!save||!steps)return;save.onclick=saveAll;if(!steps.dataset.stepWire){steps.dataset.stepWire='1';steps.addEventListener('input',()=>{const names=stepNames();Object.keys(stepMap).forEach(k=>{if(Number(k)>=names.length)delete stepMap[k]});renderStepUi()})}['cat_title','cat_icon'].forEach(id=>{const el=qs(id);if(el&&!el.dataset.orderWire){el.dataset.orderWire='1';el.addEventListener('input',renderOrderPreview)}});if(!editor.classList.contains('hidden')){loadStepMap();renderOrderPreview()}}
-const mo=new MutationObserver(()=>wire());mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});document.addEventListener('click',e=>{if(e.target.closest('[data-category]')||e.target.closest('#addCategoryBtn'))setTimeout(()=>{loadedKey=null;orderLoadedKey=null;wire()},0)});wire();
+document.addEventListener('click',e=>{if(e.target.closest('[data-category]')||e.target.closest('#addCategoryBtn'))setTimeout(()=>{loadedKey=null;orderLoadedKey=null;wire()},0)});
+wire();
 })();
