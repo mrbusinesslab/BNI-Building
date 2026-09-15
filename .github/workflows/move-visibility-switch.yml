@@ -1,0 +1,42 @@
+name: Move member visibility control to top switch
+on:
+  push:
+    paths:
+      - '.github/workflows/move-visibility-switch.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch admin visibility UI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('admin/index.html')
+          s=p.read_text()
+          old_css='.visibility-box{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 16px;margin:14px 0;border:1px solid var(--line);border-radius:14px;background:#fbfcfd}.visibility-box b{display:block;margin-bottom:4px}.visibility-box .help{margin:0}.visibility-box .btn{flex:0 0 auto}'
+          new_css='.page-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.visibility-toggle{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;user-select:none}.visibility-toggle input{position:absolute;opacity:0;pointer-events:none}.switch-track{position:relative;width:46px;height:26px;border-radius:999px;background:#c7d3d7;transition:.2s}.switch-track:after{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.22);transition:.2s}.visibility-toggle input:checked + .switch-track{background:var(--brand)}.visibility-toggle input:checked + .switch-track:after{transform:translateX(20px)}.visibility-toggle input:focus-visible + .switch-track{outline:3px solid rgba(0,70,95,.18)}'
+          if old_css not in s: raise SystemExit('old css not found')
+          s=s.replace(old_css,new_css,1)
+          old_head='<div id="editor" class="hidden"><div class="page-head"><div><h1 id="memberTitle"></h1><p id="memberSubtitle"></p></div><button class="btn secondary" id="refreshBtn">重新讀取</button></div>'
+          new_head='<div id="editor" class="hidden"><div class="page-head"><div><h1 id="memberTitle"></h1><p id="memberSubtitle"></p></div><div class="page-actions"><label class="visibility-toggle" title="關閉後只隱藏前台顯示，所有資料仍會保留"><span id="memberVisibilityLabel">前台顯示</span><input id="memberVisibilitySwitch" type="checkbox"><span class="switch-track" aria-hidden="true"></span></label><button class="btn secondary" id="refreshBtn">重新讀取</button></div></div>'
+          if old_head not in s: raise SystemExit('page head not found')
+          s=s.replace(old_head,new_head,1)
+          old_box='<div class="visibility-box"><div><b id="memberVisibilityTitle">前台顯示中</b><div class="help" id="memberVisibilityHelp">此成員目前會出現在前台名單與需求配對。</div></div><button class="btn danger" id="toggleMemberVisibilityBtn" type="button">隱藏人員</button></div>'
+          if old_box not in s: raise SystemExit('old visibility box not found')
+          s=s.replace(old_box,'',1)
+          old_js="function refreshVisibilityUi(){if(!current)return;const hidden=current.is_published===false;$('memberVisibilityTitle').textContent=hidden?'前台已隱藏':'前台顯示中';$('memberVisibilityHelp').textContent=hidden?'資料仍完整保留，只是不會出現在前台名單、需求配對與人物搜尋。':'此成員目前會出現在前台名單、需求配對與人物搜尋。';const b=$('toggleMemberVisibilityBtn');b.textContent=hidden?'恢復顯示':'隱藏人員';b.className='btn '+(hidden?'secondary':'danger')}\n$('toggleMemberVisibilityBtn').onclick=async()=>{if(!current)return;const next=current.is_published===false;const {data,error}=await sb.from('bni_members').update({is_published:next}).eq('id',current.id).select().single();if(error)return note($('globalNotice'),'更新顯示狀態失敗：'+error.message,'error');current=data;members=members.map(x=>x.id===data.id?data:x);refreshVisibilityUi();note($('globalNotice'),next?'已恢復前台顯示。':'已隱藏此人員，所有資料與紀錄仍保留。');await loadMembers()};"
+          new_js="function refreshVisibilityUi(){if(!current)return;const visible=current.is_published!==false;const sw=$('memberVisibilitySwitch');if(sw)sw.checked=visible;const label=$('memberVisibilityLabel');if(label)label.textContent=visible?'前台顯示':'前台隱藏'}\n$('memberVisibilitySwitch').onchange=async e=>{if(!current)return;const next=!!e.currentTarget.checked;e.currentTarget.disabled=true;const {data,error}=await sb.from('bni_members').update({is_published:next}).eq('id',current.id).select().single();e.currentTarget.disabled=false;if(error){refreshVisibilityUi();return note($('globalNotice'),'更新顯示狀態失敗：'+error.message,'error')}current=data;members=members.map(x=>x.id===data.id?data:x);refreshVisibilityUi();note($('globalNotice'),next?'已恢復前台顯示。':'已隱藏此人員，所有資料與紀錄仍保留。');await loadMembers()};"
+          if old_js not in s: raise SystemExit('old visibility js not found')
+          s=s.replace(old_js,new_js,1)
+          p.write_text(s)
+          PY
+      - name: Commit change
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add admin/index.html
+          git commit -m 'Use top visibility switch in admin'
+          git push
