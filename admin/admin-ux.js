@@ -49,7 +49,7 @@
   function addFrontLink(){
     const top=document.querySelector('#appView .topbar');if(!top||document.getElementById('adminFrontLink'))return;
     const right=top.querySelector('.muted');
-    const a=document.createElement('a');a.id='adminFrontLink';a.className='admin-front-link';a.href='https://www.bni-building.com/';a.target='_blank';a.rel='noopener';a.textContent='↗ 查看前台';
+    const a=document.createElement('a');a.id='adminFrontLink';a.className='admin-front-link';a.href='https://mrbusinesslab.github.io/BNI-Building/';a.target='_blank';a.rel='noopener';a.textContent='↗ 查看前台';
     if(right)right.replaceWith(a);else top.appendChild(a);
   }
 
