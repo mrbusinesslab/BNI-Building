@@ -98,7 +98,6 @@ async function loadBackendProfiles(){
   collabs.forEach(x=>{const m=byId.get(x.member_id);if(m&&backendProfiles.has(m.name))backendProfiles.get(m.name).collabs.push(x)});
   contacts.forEach(x=>{const m=byId.get(x.member_id);if(m&&backendProfiles.has(m.name))backendProfiles.get(m.name).contacts.push(x)});
   const mapped=members.map(m=>({id:m.id,company:m.company||'',name:m.name,desc:m.tagline||'',tags:memberProblems(m),problem_keys:memberProblems(m),role_keys:memberRoles(m)}));allMembers.splice(0,allMembers.length,...mapped);
-  members.forEach(m=>{const p=backendProfiles.get(m.name);if((m.intro||'').trim()||(m.expertise_category||'').trim()||(m.services||'').trim()||(m.common_problems||'').trim()||(m.work_scope||'').trim()||(m.card_json_url||'').trim()||p.cases.length||p.collabs.length||p.contacts.length){} });
   if(!nr.error&&(nr.data||[]).length){needsData.splice(0,needsData.length,...nr.data.map(x=>({key:x.key,icon:x.icon||'•',title:x.title||'',small:x.small||'',text:x.description||'',steps:Array.isArray(x.steps)?x.steps:[]})))}
   needMemberIds.clear();if(!nmr.error)(nmr.data||[]).forEach(x=>{if(!needMemberIds.has(x.need_key))needMemberIds.set(x.need_key,[]);needMemberIds.get(x.need_key).push(x.member_id)});
   needStepMembers.clear();if(!smr.error)(smr.data||[]).forEach(x=>{if(!needStepMembers.has(x.need_key))needStepMembers.set(x.need_key,[]);needStepMembers.get(x.need_key).push(x)});
