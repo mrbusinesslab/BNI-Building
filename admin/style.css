@@ -20,3 +20,11 @@
 .audit-tools select,.audit-tools input{height:38px;border:1px solid #d1d5db;border-radius:8px;background:#fff;padding:0 10px;font:inherit}
 .audit-tools #auditSearch{min-width:210px}
 @media(max-width:720px){.audit-tools{width:100%}.audit-tools select,.audit-tools input,.audit-tools .btn{width:100%}}
+
+.session-times{display:grid;grid-template-columns:repeat(3,minmax(135px,1fr));gap:8px;margin-top:12px}
+.session-time-item{padding:10px 12px;border-radius:9px;background:#f6f7f8;border:1px solid #eceff1}
+.session-time-item span{display:block;font-size:12px;color:#6b7280;margin-bottom:4px}
+.session-time-item strong{display:block;font-size:14px;font-weight:650;color:#1f2937;white-space:nowrap}
+.session-card.current .session-time-item.active{background:#edf8f4;border-color:#c7e6dc}
+.session-card.current .session-time-item.active span{color:#397565}
+@media(max-width:720px){.session-times{grid-template-columns:1fr;width:100%}.session-time-item{display:flex;align-items:center;justify-content:space-between;gap:16px}.session-time-item span{margin:0}.session-time-item strong{font-size:14px}}
