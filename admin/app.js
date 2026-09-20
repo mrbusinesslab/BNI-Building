@@ -174,7 +174,11 @@ async function loadSessions(){
       <div class="session-main">
         <div class="session-name-row"><b>${esc(displayName)}</b><span class="badge${x.is_current?' green':''}">${x.is_current?'目前裝置':'其他裝置'}</span></div>
         <div class="session-device">${esc(autoName)}${x.device_name?'':' · 尚未命名'}</div>
-        <div class="session-meta">登入時間：${esc(fmtTime(x.created_at))}　最後活動：${esc(fmtTime(x.last_seen_at||x.created_at))}　登入期限：${esc(fmtTime(x.expires_at))}</div>
+        <div class="session-times">
+          <div class="session-time-item"><span>登入時間</span><strong>${esc(fmtTime(x.created_at))}</strong></div>
+          <div class="session-time-item active"><span>最後活動</span><strong>${esc(fmtTime(x.last_seen_at||x.created_at))}</strong></div>
+          <div class="session-time-item"><span>登入期限</span><strong>${esc(fmtTime(x.expires_at))}</strong></div>
+        </div>
       </div>
       <div class="session-actions">
         <button class="btn ghost" data-name-session="${esc(x.session_id)}" data-current-name="${esc(x.device_name||'')}">命名</button>
