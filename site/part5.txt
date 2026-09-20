@@ -103,6 +103,7 @@ async function loadBackendProfiles(){
   needMemberIds.clear();if(!nmr.error)(nmr.data||[]).forEach(x=>{if(!needMemberIds.has(x.need_key))needMemberIds.set(x.need_key,[]);needMemberIds.get(x.need_key).push(x.member_id)});
   needStepMembers.clear();if(!smr.error)(smr.data||[]).forEach(x=>{if(!needStepMembers.has(x.need_key))needStepMembers.set(x.need_key,[]);needStepMembers.get(x.need_key).push(x)});
   renderDirectoryFromBackend();
+  syncDirectoryCardsInteractivity();
   const preferred=needsData.some(x=>x.key===currentNeedKey)?currentNeedKey:(needsData[0]?.key||'water');selectNeed(preferred,false);
 }
 
@@ -125,6 +126,37 @@ function renderProfessionalDetails(row){
   const scopeHtml=scope?(hasFlow?`<div class="professional-block"><div class="professional-detail-label">服務流程</div><div class="professional-flow">${flow.map((x,i)=>`${i?'<span class="professional-flow-arrow">→</span>':''}<span class="professional-flow-step">${esc(x)}</span>`).join('')}</div></div>`:`<div class="professional-block"><div class="professional-detail-label">常見施工／服務內容</div><div class="professional-text">${esc(scope)}</div></div>`):'';
   wrap.innerHTML=categoryHtml+serviceHtml+problemHtml+scopeHtml;
 }
-openProfile=async function(name){if(!hasProfileData(name))return;const m=memberByName(name);if(!m)return;const p=backendProfiles.get(name)||{member:{},cases:[],collabs:[],contacts:[]},row=p.member||{};document.getElementById('profileCompany').textContent=m.company||'';document.getElementById('profileName').textContent=m.name||'';document.getElementById('profileTagline').textContent=m.desc||'';await renderEcardGallery(m);const intro=(row.intro||'').trim(),hasIntro=!!intro,hasCases=p.cases.length>0,hasBni=p.collabs.length>0;const introSection=document.getElementById('introSection'),caseSection=document.getElementById('caseSection'),bniSection=document.getElementById('bniSection'),profileGrid=document.querySelector('.profile-grid');introSection.classList.toggle('is-hidden',!hasIntro);caseSection.classList.toggle('is-hidden',!hasCases);bniSection.classList.toggle('is-hidden',!hasBni);profileGrid.classList.toggle('single-column',!hasBni);document.getElementById('profileIntro').textContent=intro;renderProfessionalDetails(row);const caseEl=document.getElementById('profileCases');caseEl.classList.toggle('three-cases',p.cases.length===3);caseEl.innerHTML=hasCases?p.cases.map(c=>`${c.link_url?`<a class="case-link" href="${c.link_url}" target="_blank" rel="noopener noreferrer">`:''}<div class="case-item ${c.link_url?'case-clickable':''}">${c.image_url?`<img src="${c.image_url}" alt="${c.title||''}" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;margin-bottom:12px">`:''}<b>${c.title||''}</b><span>${c.description||''}</span>${c.link_url?'<span class="case-source">查看案例 →</span>':''}</div>${c.link_url?'</a>':''}`).join(''):'';document.getElementById('profileBNI').innerHTML=hasBni?p.collabs.map(c=>`<div class="bni-item">${c.image_url?`<img src="${c.image_url}" alt="${c.title||''}" style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;margin-bottom:10px">`:''}<b>${c.title||''}</b><span>${[c.partner_name,c.collaboration_date].filter(Boolean).join('｜')}</span><span>${c.description||''}</span>${c.link_url?`<a href="${c.link_url}" target="_blank" rel="noopener noreferrer" class="case-source">查看內容 →</a>`:''}</div>`).join(''):'';await renderContacts(m);document.getElementById('profileOverlay').classList.add('open');document.body.style.overflow='hidden'};
+openProfile=async function(name){
+  if(!hasProfileData(name))return;
+  const m=memberByName(name);if(!m)return;
+  const p=backendProfiles.get(name)||{member:{},cases:[],collabs:[],contacts:[]},row=p.member||{};
+
+  document.getElementById('profileCompany').textContent=m.company||'';
+  document.getElementById('profileName').textContent=m.name||'';
+  document.getElementById('profileTagline').textContent=m.desc||'';
+
+  // 專業服務先用 Supabase 成員資料同步渲染，不等待電子名片或聯絡方式網路請求。
+  renderProfessionalDetails(row);
+
+  const intro=(row.intro||'').trim(),hasIntro=!!intro,hasCases=p.cases.length>0,hasBni=p.collabs.length>0;
+  const introSection=document.getElementById('introSection'),caseSection=document.getElementById('caseSection'),bniSection=document.getElementById('bniSection'),profileGrid=document.querySelector('.profile-grid');
+  introSection.classList.toggle('is-hidden',!hasIntro);
+  caseSection.classList.toggle('is-hidden',!hasCases);
+  bniSection.classList.toggle('is-hidden',!hasBni);
+  profileGrid.classList.toggle('single-column',!hasBni);
+  document.getElementById('profileIntro').textContent=intro;
+
+  const caseEl=document.getElementById('profileCases');
+  caseEl.classList.toggle('three-cases',p.cases.length===3);
+  caseEl.innerHTML=hasCases?p.cases.map(c=>`${c.link_url?`<a class="case-link" href="${c.link_url}" target="_blank" rel="noopener noreferrer">`:''}<div class="case-item ${c.link_url?'case-clickable':''}">${c.image_url?`<img src="${c.image_url}" alt="${c.title||''}" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;margin-bottom:12px">`:''}<b>${c.title||''}</b><span>${c.description||''}</span>${c.link_url?'<span class="case-source">查看案例 →</span>':''}</div>${c.link_url?'</a>':''}`).join(''):'';
+
+  document.getElementById('profileBNI').innerHTML=hasBni?p.collabs.map(c=>`<div class="bni-item">${c.image_url?`<img src="${c.image_url}" alt="${c.title||''}" style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;margin-bottom:10px">`:''}<b>${c.title||''}</b><span>${[c.partner_name,c.collaboration_date].filter(Boolean).join('｜')}</span><span>${c.description||''}</span>${c.link_url?`<a href="${c.link_url}" target="_blank" rel="noopener noreferrer" class="case-source">查看內容 →</a>`:''}</div>`).join(''):'';
+
+  // 先打開人物頁，避免電子名片載入速度影響專業服務顯示。
+  document.getElementById('profileOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+
+  await Promise.allSettled([renderEcardGallery(m),renderContacts(m)]);
+};
 window.addEventListener('DOMContentLoaded',async()=>{await loadBackendProfiles()});
 </script>
