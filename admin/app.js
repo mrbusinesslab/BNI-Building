@@ -3,7 +3,7 @@ const K='sb_publishable_Jrp7cxW-ppSJtrk-lScZjA_blNEnBRG';
 const EMAIL='mr.business.labb@gmail.com';
 const base=supabase.createClient(U,K,{auth:{persistSession:false}});
 let token=localStorage.getItem('bni_admin_token')||'';
-let sb=null,members=[],currentMember=null,categories=[],currentCategory=null,events=[];
+let sb=null,members=[],currentMember=null,categories=[],currentCategory=null,events=[];let memberContactCounts=new Map(),memberMatchCounts=new Map();
 const $=id=>document.getElementById(id);
 const esc=(v='')=>String(v).replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[s]));
 const val=id=>($(id)?.value||'').trim();
@@ -13,7 +13,7 @@ async function sessionApi(action,payload={}){const res=await fetch(U+'/functions
 async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function fmtTime(x){if(!x)return'';try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(x))}catch{return x}}
 function showApp(){makeClient();$('loginView').classList.add('hidden');$('appView').classList.remove('hidden')}
-function switchPage(name){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===`page-${name}`));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.page===name));const titles={dashboard:'儀表板',members:'成員管理',matching:'類別配對',logs:'媒合紀錄',audit:'後台操作紀錄',sessions:'登入裝置'};$('topTitle').textContent=titles[name]||'後台管理';if(name==='dashboard')loadDashboard();if(name==='members')loadMembers();if(name==='matching')loadCategories();if(name==='logs')loadLogs();if(name==='audit')loadAuditLogs();if(name==='sessions')loadSessions()}
+function switchPage(name){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===`page-${name}`));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.page===name));const titles={dashboard:'儀表板',members:'成員管理',matching:'類別配對',logs:'媒合紀錄',audit:'登入紀錄',sessions:'登入裝置'};$('topTitle').textContent=titles[name]||'後台管理';if(name==='dashboard')loadDashboard();if(name==='members')loadMembers();if(name==='matching')loadCategories();if(name==='logs')loadLogs();if(name==='audit')loadAuditLogs();if(name==='sessions')loadSessions()}
 
 $('loginBtn').onclick=async()=>{const pw=val('password');if(!pw){$('loginNotice').innerHTML='<div class="notice error">請輸入密碼。</div>';return}const btn=$('loginBtn');btn.disabled=true;const hash=await sha256(pw);try{const res=await fetch(U+'/functions/v1/bni-admin-login',{method:'POST',headers:{'Content-Type':'application/json','apikey':K},body:JSON.stringify({email:EMAIL,password_sha256:hash})});const data=await res.json().catch(()=>({status:'error'}));if(data.status==='blocked'){const mins=Math.max(1,Math.ceil(Number(data.retry_after||900)/60));$('loginNotice').innerHTML='<div class="notice error">登入嘗試過多，請約 '+mins+' 分鐘後再試。</div>';return}if(data.status!=='ok'||!data.token){$('loginNotice').innerHTML='<div class="notice error">帳號或密碼錯誤。</div>';return}token=data.token;localStorage.setItem('bni_admin_token',token);showApp();await bootstrap()}catch(e){$('loginNotice').innerHTML='<div class="notice error">登入服務暫時無法使用，請稍後再試。</div>'}finally{btn.disabled=false}};
 $('password').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginBtn').click()});
@@ -73,8 +73,9 @@ function analyzeText(text){const s=String(text||'').toLowerCase(),p=new Set(),r=
 function renderRouteChecks(member){const ps=member?.problem_keys||[],rs=member?.role_keys||[];$('routeProblems').innerHTML=PROBLEMS.map(([v,l])=>`<label class="check"><input type="checkbox" data-route-p value="${v}" ${ps.includes(v)?'checked':''}>${l}</label>`).join('');$('routeRoles').innerHTML=ROLES.map(([v,l])=>`<label class="check"><input type="checkbox" data-route-r value="${v}" ${rs.includes(v)?'checked':''}>${l}</label>`).join('')}
 function checked(sel){return[...document.querySelectorAll(sel)].filter(x=>x.checked).map(x=>x.value)}
 
-async function loadMembers(render=true){const {data,error}=await sb.from('bni_members').select('*').order('member_no').order('sort_order');if(error){notice('成員讀取失敗：'+error.message,'error');return}members=data||[];if(render)renderMemberList()}
-function renderMemberList(){const el=$('memberList');el.innerHTML=members.map(m=>`<button class="list-item ${currentMember?.id===m.id?'active':''}" data-member="${m.id}"><b>${m.member_no||'-'}｜${esc(m.name)}</b><span>${esc(m.company||'')}｜${m.is_published===false?'前台隱藏':'前台顯示'}</span></button>`).join('');el.querySelectorAll('[data-member]').forEach(b=>b.onclick=()=>selectMember(b.dataset.member))}
+async function loadMembers(render=true){const [mr,cr,nr,sr]=await Promise.all([sb.from('bni_members').select('*').order('member_no').order('sort_order'),sb.from('bni_member_contacts').select('member_id').eq('is_published',true),sb.from('bni_need_members').select('member_id'),sb.from('bni_need_step_members').select('member_id')]);if(mr.error){notice('成員讀取失敗：'+mr.error.message,'error');return}members=mr.data||[];memberContactCounts=new Map();(cr.data||[]).forEach(x=>memberContactCounts.set(x.member_id,(memberContactCounts.get(x.member_id)||0)+1));memberMatchCounts=new Map();[...(nr.data||[]),...(sr.data||[])].forEach(x=>memberMatchCounts.set(x.member_id,(memberMatchCounts.get(x.member_id)||0)+1));if(render)renderMemberList()}
+function memberCompleteness(m){const checks=[!!(m.name&&m.company&&m.tagline),!!(m.expertise_category&&m.services&&m.common_problems&&m.work_scope),!!String(m.intro||'').trim(),!!String(m.card_json_url||'').trim(),(memberContactCounts.get(m.id)||0)>0,(memberMatchCounts.get(m.id)||0)>0];return{done:checks.filter(Boolean).length,total:checks.length}}
+function renderMemberList(){const el=$('memberList');el.innerHTML=members.map(m=>{const c=memberCompleteness(m);return `<button class="list-item ${currentMember?.id===m.id?'active':''}" data-member="${m.id}"><b>${m.member_no||'-'}｜${esc(m.name)}</b><span>${esc(m.company||'')}｜${m.is_published===false?'前台隱藏':'前台顯示'}｜資料完整 ${c.done}/${c.total}</span></button>`}).join('');el.querySelectorAll('[data-member]').forEach(b=>b.onclick=()=>selectMember(b.dataset.member))}
 function clearMemberForm(){['m_name','m_company','m_title','m_tagline','m_expertise','m_services','m_common_problems','m_work_scope','m_intro','m_card_json_url'].forEach(id=>$(id).value='');$('m_visible').checked=true;renderRouteChecks(null);$('memberNoText').textContent='建立後自動編號'}
 $('addMemberBtn').onclick=()=>{currentMember={id:null};clearMemberForm();renderMemberList();showMemberEditor();switchMemberTab('basic')};
 function showMemberEditor(){$('memberEmpty').classList.add('hidden');$('memberEditor').classList.remove('hidden')}
@@ -123,38 +124,31 @@ function renderLogs(){const filter=$('logFilter').value;const rows=filter==='all
 $('logFilter').onchange=renderLogs;
 
 let auditEvents=[];
-const AUDIT_EVENT_LABELS={login_success:'登入成功',login_failure:'登入失敗',login_blocked:'登入已暫時限制',logout:'登出',sessions_revoked:'登出其他裝置',session_revoked:'登出指定裝置',session_named:'裝置命名',data_insert:'新增資料',data_update:'修改資料',data_delete:'刪除資料'};
-const AUDIT_ENTITY_LABELS={bni_members:'成員',bni_member_cases:'案例',bni_member_collaborations:'BNI 合作',bni_member_contacts:'聯絡方式',bni_need_categories:'問題類別',bni_need_members:'類別配對',bni_need_step_members:'步驟配對'};
-const AUDIT_FIELD_LABELS={name:'姓名',company:'公司',title:'標題／職稱',tagline:'專業定位',intro:'自我介紹',expertise_category:'專業類別',services:'主要服務',common_problems:'擅長處理',work_scope:'服務內容',card_json_url:'電子名片',is_published:'前台顯示',problem_keys:'問題分類',role_keys:'流程角色',description:'內容',link_url:'連結',image_url:'圖片',partner_name:'合作對象',collaboration_date:'合作日期',contact_type:'聯絡類型',label:'顯示標題',display_text:'顯示文字',url:'URL',key:'類別代碼',icon:'圖示',small:'摘要',steps:'處理步驟',sort_order:'排序',is_active:'前台顯示類別',need_key:'需求類別',member_id:'成員',step_index:'步驟'};
+const LOGIN_EVENT_LABELS={login_success:'登入成功',login_failure:'登入失敗',login_blocked:'登入已暫時限制',logout:'登出'};
 async function loadAuditLogs(){
-  const {data,error}=await sb.from('bni_admin_audit_logs').select('*').order('created_at',{ascending:false}).limit(1000);
-  if(error)return notice('後台操作紀錄讀取失敗：'+error.message,'error');
+  const {data,error}=await sb.from('bni_admin_audit_logs').select('event_type,admin_email,target_label,meta,created_at').in('event_type',['login_success','login_failure','login_blocked','logout']).order('created_at',{ascending:false}).limit(1000);
+  if(error)return notice('登入紀錄讀取失敗：'+error.message,'error');
   auditEvents=data||[];renderAuditLogs();
 }
 function renderAuditLogs(){
   const filter=$('auditFilter')?.value||'all';
-  const q=($('auditSearch')?.value||'').trim().toLowerCase();
   const from=$('auditDateFrom')?.value?new Date($('auditDateFrom').value+'T00:00:00+08:00'):null;
   const to=$('auditDateTo')?.value?new Date($('auditDateTo').value+'T23:59:59+08:00'):null;
-  const sessionTypes=['login_success','login_failure','login_blocked','logout','session_named','session_revoked','sessions_revoked'];
   const rows=auditEvents.filter(x=>{
-    const typeOk=filter==='all'||(filter==='login'&&sessionTypes.includes(x.event_type))||(filter==='failure'&&['login_failure','login_blocked'].includes(x.event_type))||(filter==='data'&&x.event_type.startsWith('data_'))||(filter==='delete'&&x.event_type==='data_delete');
-    if(!typeOk)return false;
+    if(filter==='success'&&x.event_type!=='login_success')return false;
+    if(filter==='failure'&&!['login_failure','login_blocked'].includes(x.event_type))return false;
+    if(filter==='logout'&&x.event_type!=='logout')return false;
     const d=new Date(x.created_at);if(from&&d<from)return false;if(to&&d>to)return false;
-    if(q){const hay=[x.admin_email,x.target_label,x.entity_id,x.entity_type,...(x.changed_fields||[])].filter(Boolean).join(' ').toLowerCase();if(!hay.includes(q))return false}
     return true;
   });
   $('auditList').innerHTML=rows.length?rows.map(x=>{
-    const eventLabel=AUDIT_EVENT_LABELS[x.event_type]||x.event_type;
-    const entity=AUDIT_ENTITY_LABELS[x.entity_type]||x.entity_type||'管理員';
-    const fields=(x.changed_fields||[]).map(k=>AUDIT_FIELD_LABELS[k]||k).join('、');
-    const detail=x.event_type.startsWith('data_')?[entity,x.target_label||x.entity_id||'',fields?('欄位：'+fields):''].filter(Boolean).join('｜'):(x.target_label||x.admin_email||'管理員');
     const badgeClass=['login_failure','login_blocked'].includes(x.event_type)?' red':(x.event_type==='login_success'?' green':'');
-    return `<div class="log-row"><div class="time">${fmtTime(x.created_at)}</div><div><span class="badge${badgeClass}">${esc(eventLabel)}</span></div><div>${esc(x.admin_email||'管理員')}</div><div>${esc(detail)}</div></div>`;
-  }).join(''):'<div class="empty">目前沒有符合的後台操作紀錄。</div>';
+    const detail=x.event_type==='login_failure'?'密碼錯誤':x.event_type==='login_blocked'?'登入嘗試過多':(x.admin_email||'管理員');
+    return `<div class="log-row"><div class="time">${fmtTime(x.created_at)}</div><div><span class="badge${badgeClass}">${esc(LOGIN_EVENT_LABELS[x.event_type]||x.event_type)}</span></div><div>${esc(x.admin_email||'管理員')}</div><div>${esc(detail)}</div></div>`;
+  }).join(''):'<div class="empty">目前沒有符合的登入紀錄。</div>';
 }
-['auditFilter','auditSearch','auditDateFrom','auditDateTo'].forEach(id=>{if($(id))$(id).oninput=renderAuditLogs});
-if($('auditClearBtn'))$('auditClearBtn').onclick=()=>{if($('auditFilter'))$('auditFilter').value='all';if($('auditSearch'))$('auditSearch').value='';if($('auditDateFrom'))$('auditDateFrom').value='';if($('auditDateTo'))$('auditDateTo').value='';renderAuditLogs()};
+['auditFilter','auditDateFrom','auditDateTo'].forEach(id=>{if($(id))$(id).oninput=renderAuditLogs});
+if($('auditClearBtn'))$('auditClearBtn').onclick=()=>{if($('auditFilter'))$('auditFilter').value='all';if($('auditDateFrom'))$('auditDateFrom').value='';if($('auditDateTo'))$('auditDateTo').value='';renderAuditLogs()};
 
 function sessionDeviceLabel(ua){
   const s=String(ua||'');
