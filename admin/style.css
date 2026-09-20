@@ -15,3 +15,8 @@
 .session-meta{font-size:12px;color:#6b7280}
 .session-actions{display:flex;gap:8px;flex:0 0 auto}
 @media(max-width:720px){.session-card{align-items:flex-start;flex-direction:column}.session-actions{width:100%}.session-actions .btn{flex:1}.session-meta{line-height:1.7}}
+
+.audit-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.audit-tools select,.audit-tools input{height:38px;border:1px solid #d1d5db;border-radius:8px;background:#fff;padding:0 10px;font:inherit}
+.audit-tools #auditSearch{min-width:210px}
+@media(max-width:720px){.audit-tools{width:100%}.audit-tools select,.audit-tools input,.audit-tools .btn{width:100%}}
