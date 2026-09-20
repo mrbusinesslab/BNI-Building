@@ -122,7 +122,7 @@ function renderLogs(){const filter=$('logFilter').value;const rows=filter==='all
 $('logFilter').onchange=renderLogs;
 
 let auditEvents=[];
-const AUDIT_EVENT_LABELS={login_success:'登入成功',login_failure:'登入失敗',login_blocked:'登入已暫時限制',logout:'登出',sessions_revoked:'登出其他裝置',data_insert:'新增資料',data_update:'修改資料',data_delete:'刪除資料'};
+const AUDIT_EVENT_LABELS={login_success:'登入成功',login_failure:'登入失敗',login_blocked:'登入已暫時限制',logout:'登出',sessions_revoked:'登出其他裝置',session_revoked:'登出指定裝置',data_insert:'新增資料',data_update:'修改資料',data_delete:'刪除資料'};
 const AUDIT_ENTITY_LABELS={bni_members:'成員',bni_member_cases:'案例',bni_member_collaborations:'BNI 合作',bni_member_contacts:'聯絡方式',bni_need_categories:'問題類別',bni_need_members:'類別配對',bni_need_step_members:'步驟配對'};
 const AUDIT_FIELD_LABELS={name:'姓名',company:'公司',title:'標題／職稱',tagline:'專業定位',intro:'自我介紹',expertise_category:'專業類別',services:'主要服務',common_problems:'擅長處理',work_scope:'服務內容',card_json_url:'電子名片',is_published:'前台顯示',problem_keys:'問題分類',role_keys:'流程角色',description:'內容',link_url:'連結',image_url:'圖片',partner_name:'合作對象',collaboration_date:'合作日期',contact_type:'聯絡類型',label:'顯示標題',display_text:'顯示文字',url:'URL',key:'類別代碼',icon:'圖示',small:'摘要',steps:'處理步驟',sort_order:'排序',is_active:'前台顯示類別',need_key:'需求類別',member_id:'成員',step_index:'步驟'};
 async function loadAuditLogs(){
@@ -154,15 +154,15 @@ async function loadSessions(){
   const {data,error}=await sb.rpc('bni_admin_list_sessions');
   if(error)return notice('登入裝置讀取失敗：'+error.message,'error');
   const rows=data||[];
-  $('sessionList').innerHTML=rows.length?rows.map(x=>`<div class="log-row"><div class="time">${fmtTime(x.created_at)}</div><div><span class="badge${x.is_current?' green':''}">${x.is_current?'目前裝置':'其他裝置'}</span></div><div>${esc(sessionDeviceLabel(x.user_agent))}</div><div>登入期限：${esc(fmtTime(x.expires_at))}</div></div>`).join(''):'<div class="empty">目前沒有有效的登入 Session。</div>';
-  const btn=$('revokeOtherSessionsBtn');if(btn)btn.disabled=rows.filter(x=>!x.is_current).length===0;
+  $('sessionList').innerHTML=rows.length?rows.map(x=>`<div class="log-row"><div class="time">${fmtTime(x.created_at)}</div><div><span class="badge${x.is_current?' green':''}">${x.is_current?'目前裝置':'其他裝置'}</span></div><div>${esc(sessionDeviceLabel(x.user_agent))}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><span>登入期限：${esc(fmtTime(x.expires_at))}</span>${x.is_current?'':`<button class="btn danger" data-revoke-session="${esc(x.session_id)}">登出此裝置</button>`}</div></div>`).join(''):'<div class="empty">目前沒有有效的登入 Session。</div>';
+  $('sessionList').querySelectorAll('[data-revoke-session]').forEach(btn=>btn.onclick=async()=>{
+    if(!confirm('確定要登出這個裝置？'))return;
+    btn.disabled=true;
+    const {data,error}=await sb.rpc('bni_admin_revoke_session',{p_session_id:btn.dataset.revokeSession});
+    if(error||data!==true){btn.disabled=false;return notice('登出此裝置失敗。','error')}
+    notice('已登出指定裝置。');
+    await loadSessions();
+  });
 }
-if($('revokeOtherSessionsBtn'))$('revokeOtherSessionsBtn').onclick=async()=>{
-  if(!confirm('確定要登出目前裝置以外的所有後台 Session？'))return;
-  const {data,error}=await sb.rpc('bni_admin_revoke_other_sessions');
-  if(error)return notice('登出其他裝置失敗：'+error.message,'error');
-  notice('已登出其他裝置，共 '+Number(data||0)+' 個 Session。');
-  await loadSessions();
-};
 
 (async()=>{if(token){showApp();await bootstrap()}})();
