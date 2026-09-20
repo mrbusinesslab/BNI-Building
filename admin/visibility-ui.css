@@ -3,14 +3,14 @@
 .member-status-item .member-completeness.is-complete{background:#e8f6f0;color:#246b55;border:1px solid #c6e5d8}
 .member-status-item .member-completeness.is-incomplete{background:#fff3df;color:#92550f;border:1px solid #f0d2a4}
 
-.member-status-item{display:grid!important;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;row-gap:5px;padding-right:76px!important}
+.member-status-item{display:grid!important;grid-template-columns:1fr;row-gap:5px;padding-right:76px!important}
 .member-status-main{min-width:0}
 .member-status-main>b,.member-status-main>span{display:block}
-.member-status-item .member-completeness{grid-column:2;grid-row:1 / span 2;align-self:center;min-width:96px;width:auto!important;margin:0!important;gap:8px}
-.member-status-item .member-missing{grid-column:1 / -1;font-size:11px;font-weight:700;color:#9a5a12;margin-top:2px;line-height:1.45}
+.member-status-item .member-completeness{grid-column:1;grid-row:auto;justify-self:stretch;width:100%!important;margin:4px 0 0!important;gap:8px}
+.member-status-item .member-missing{grid-column:1;grid-row:auto;font-size:11px;font-weight:700;color:#9a5a12;margin-top:0;line-height:1.45}
 .member-status-item .member-missing.is-complete{color:#39745f}
 @media(max-width:620px){
   .member-status-item{grid-template-columns:1fr;padding-right:72px!important}
-  .member-status-item .member-completeness{grid-column:1;grid-row:auto;justify-self:start}
+  .member-status-item .member-completeness{grid-column:1;grid-row:auto;justify-self:stretch}
   .member-status-item .member-missing{grid-column:1}
 }
