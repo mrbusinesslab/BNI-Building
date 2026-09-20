@@ -151,18 +151,42 @@ function sessionDeviceLabel(ua){
   return os+' · '+browser;
 }
 async function loadSessions(){
+  await sb.rpc('bni_admin_update_current_session_device',{p_user_agent:navigator.userAgent}).catch(()=>{});
   const {data,error}=await sb.rpc('bni_admin_list_sessions');
   if(error)return notice('登入裝置讀取失敗：'+error.message,'error');
   const rows=data||[];
-  $('sessionList').innerHTML=rows.length?rows.map(x=>{
+  const current=rows.filter(x=>x.is_current);
+  const others=rows.filter(x=>!x.is_current);
+
+  const card=x=>{
     const autoName=sessionDeviceLabel(x.user_agent);
     const displayName=x.device_name||autoName;
-    return `<div class="log-row"><div class="time">${fmtTime(x.created_at)}</div><div><span class="badge${x.is_current?' green':''}">${x.is_current?'目前裝置':'其他裝置'}</span></div><div><b>${esc(displayName)}</b><div class="muted">${x.device_name?esc(autoName):'尚未命名'}</div></div><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><span>登入期限：${esc(fmtTime(x.expires_at))}</span><span style="display:flex;gap:7px"><button class="btn ghost" data-name-session="${esc(x.session_id)}" data-current-name="${esc(x.device_name||'')}">命名</button>${x.is_current?'':`<button class="btn danger" data-revoke-session="${esc(x.session_id)}">登出此裝置</button>`}</span></div></div>`;
-  }).join(''):'<div class="empty">目前沒有有效的登入 Session。</div>';
+    return `<div class="session-card ${x.is_current?'current':''}">
+      <div class="session-main">
+        <div class="session-name-row"><b>${esc(displayName)}</b><span class="badge${x.is_current?' green':''}">${x.is_current?'目前裝置':'其他裝置'}</span></div>
+        <div class="session-device">${esc(autoName)}${x.device_name?'':' · 尚未命名'}</div>
+        <div class="session-meta">登入時間：${esc(fmtTime(x.created_at))}　登入期限：${esc(fmtTime(x.expires_at))}</div>
+      </div>
+      <div class="session-actions">
+        <button class="btn ghost" data-name-session="${esc(x.session_id)}" data-current-name="${esc(x.device_name||'')}">命名</button>
+        ${x.is_current?'':`<button class="btn danger" data-revoke-session="${esc(x.session_id)}">登出此裝置</button>`}
+      </div>
+    </div>`;
+  };
+
+  $('sessionList').innerHTML=`
+    <div class="session-section">
+      <div class="session-section-head"><h3>目前裝置</h3><span>${current.length} 個 Session</span></div>
+      <div class="session-stack">${current.length?current.map(card).join(''):'<div class="empty">找不到目前裝置。</div>'}</div>
+    </div>
+    <div class="session-section other">
+      <div class="session-section-head"><h3>其他裝置</h3><span>${others.length} 個 Session</span></div>
+      <div class="session-stack">${others.length?others.map(card).join(''):'<div class="empty">目前沒有其他登入裝置。</div>'}</div>
+    </div>`;
 
   $('sessionList').querySelectorAll('[data-name-session]').forEach(btn=>btn.onclick=async()=>{
-    const current=btn.dataset.currentName||'';
-    const name=prompt('輸入這台裝置的名稱，例如：公司電腦、小如 iPhone 11',current);
+    const currentName=btn.dataset.currentName||'';
+    const name=prompt('輸入這台裝置的名稱，例如：公司電腦、小如 iPhone 11',currentName);
     if(name===null)return;
     const clean=name.trim();
     if(!clean)return notice('裝置名稱不能空白。','error');
