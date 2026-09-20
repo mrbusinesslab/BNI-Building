@@ -151,7 +151,7 @@ function sessionDeviceLabel(ua){
   return os+' · '+browser;
 }
 async function loadSessions(){
-  await sb.rpc('bni_admin_update_current_session_device',{p_user_agent:navigator.userAgent}).catch(()=>{});
+  await sb.rpc('bni_admin_update_current_session_device',{p_user_agent:navigator.userAgent});
   const {data,error}=await sb.rpc('bni_admin_list_sessions');
   if(error)return notice('登入裝置讀取失敗：'+error.message,'error');
   const rows=data||[];
