@@ -71,3 +71,10 @@
 @media(min-width:900px){
   .editor-card .two.compact-two,.inline-card .two.compact-two{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* Member workspace: give the checklist more room and keep the editor compact. */
+@media(min-width:1051px){
+  .member-layout{grid-template-columns:minmax(390px,42%) minmax(0,1fr);gap:18px}
+  .member-layout .list-panel{padding:12px}
+  .member-layout .editor-card{padding:18px}
+}
