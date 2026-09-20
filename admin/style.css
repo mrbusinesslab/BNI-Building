@@ -56,3 +56,18 @@
 .professional-row label{font-size:13px;font-weight:800;color:var(--ink);margin:0}
 .professional-row input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:11px;padding:9px 11px;background:#fff;color:var(--ink);font:inherit}
 @media(max-width:720px){.member-basic-compact{grid-template-columns:1fr}.professional-row{grid-template-columns:1fr;gap:5px}}
+
+/* Compact admin editor forms: short data should not consume a full screen. */
+.editor-card .field,.inline-card .field{gap:5px;margin-bottom:10px}
+.editor-card .field label,.inline-card .field label{font-size:12px}
+.editor-card .field input,.editor-card .field select,.inline-card .field input,.inline-card .field select{min-height:36px;padding:8px 10px}
+.editor-card .two.compact-two,.inline-card .two.compact-two{gap:10px 14px}
+.editor-card .long-field textarea,.inline-card .long-field textarea{min-height:82px;padding:9px 10px;line-height:1.5}
+.editor-card .steps-field textarea{min-height:88px;padding:9px 10px;line-height:1.45}
+.editor-card .section-divider{margin:14px 0}
+.editor-card h3,.inline-card h3{margin-top:8px;margin-bottom:8px}
+.inline-card{padding-top:14px;padding-bottom:14px}
+.editor-card .savebar,.inline-card .savebar{margin-top:12px;padding-top:12px}
+@media(min-width:900px){
+  .editor-card .two.compact-two,.inline-card .two.compact-two{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
