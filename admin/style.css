@@ -28,3 +28,12 @@
 .session-card.current .session-time-item.active{background:#edf8f4;border-color:#c7e6dc}
 .session-card.current .session-time-item.active span{color:#397565}
 @media(max-width:720px){.session-times{grid-template-columns:1fr;width:100%}.session-time-item{display:flex;align-items:center;justify-content:space-between;gap:16px}.session-time-item span{margin:0}.session-time-item strong{font-size:14px}}
+
+.member-list-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.member-list-top b{min-width:0}
+.completeness-badge{display:inline-flex!important;align-items:center;flex:0 0 auto;margin:0!important;padding:4px 7px;border-radius:999px;font-size:11px!important;font-weight:800}
+.completeness-badge.complete{background:#e9f7f1;color:#256a55}
+.completeness-badge.incomplete{background:#fff4e5;color:#9a5a12}
+.list-item .member-list-meta{margin-top:6px;font-size:12px}
+.session-history-block{margin-top:34px;padding-top:30px;border-top:1px solid var(--line)}
+@media(max-width:720px){.member-list-top{align-items:flex-start}.completeness-badge{font-size:10px!important}.session-history-block{margin-top:26px;padding-top:24px}}
