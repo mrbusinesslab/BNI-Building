@@ -14,7 +14,7 @@ function fmtTime(x){if(!x)return'';try{return new Intl.DateTimeFormat('zh-TW',{t
 function showApp(){makeClient();$('loginView').classList.add('hidden');$('appView').classList.remove('hidden')}
 function switchPage(name){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===`page-${name}`));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.page===name));const titles={dashboard:'儀表板',members:'成員管理',matching:'類別配對',logs:'媒合紀錄',audit:'後台操作紀錄'};$('topTitle').textContent=titles[name]||'後台管理';if(name==='dashboard')loadDashboard();if(name==='members')loadMembers();if(name==='matching')loadCategories();if(name==='logs')loadLogs();if(name==='audit')loadAuditLogs()}
 
-$('loginBtn').onclick=async()=>{const pw=val('password');if(!pw){$('loginNotice').innerHTML='<div class="notice error">請輸入密碼。</div>';return}const hash=await sha256(pw);const {data,error}=await base.rpc('bni_admin_login',{p_email:EMAIL,p_password_sha256:hash});if(error||!data){$('loginNotice').innerHTML='<div class="notice error">帳號或密碼錯誤。</div>';return}token=data;localStorage.setItem('bni_admin_token',token);showApp();await bootstrap()};
+$('loginBtn').onclick=async()=>{const pw=val('password');if(!pw){$('loginNotice').innerHTML='<div class="notice error">請輸入密碼。</div>';return}const btn=$('loginBtn');btn.disabled=true;const hash=await sha256(pw);try{const res=await fetch(U+'/functions/v1/bni-admin-login',{method:'POST',headers:{'Content-Type':'application/json','apikey':K},body:JSON.stringify({email:EMAIL,password_sha256:hash})});const data=await res.json().catch(()=>({status:'error'}));if(data.status==='blocked'){const mins=Math.max(1,Math.ceil(Number(data.retry_after||900)/60));$('loginNotice').innerHTML='<div class="notice error">登入嘗試過多，請約 '+mins+' 分鐘後再試。</div>';return}if(data.status!=='ok'||!data.token){$('loginNotice').innerHTML='<div class="notice error">帳號或密碼錯誤。</div>';return}token=data.token;localStorage.setItem('bni_admin_token',token);showApp();await bootstrap()}catch(e){$('loginNotice').innerHTML='<div class="notice error">登入服務暫時無法使用，請稍後再試。</div>'}finally{btn.disabled=false}};
 $('password').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginBtn').click()});
 $('logoutBtn').onclick=async()=>{try{await base.rpc('bni_admin_logout',{p_token:token})}catch{}localStorage.removeItem('bni_admin_token');location.reload()};
 document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
@@ -122,7 +122,7 @@ function renderLogs(){const filter=$('logFilter').value;const rows=filter==='all
 $('logFilter').onchange=renderLogs;
 
 let auditEvents=[];
-const AUDIT_EVENT_LABELS={login_success:'登入成功',login_failure:'登入失敗',logout:'登出',data_insert:'新增資料',data_update:'修改資料',data_delete:'刪除資料'};
+const AUDIT_EVENT_LABELS={login_success:'登入成功',login_failure:'登入失敗',login_blocked:'登入已暫時限制',logout:'登出',data_insert:'新增資料',data_update:'修改資料',data_delete:'刪除資料'};
 const AUDIT_ENTITY_LABELS={bni_members:'成員',bni_member_cases:'案例',bni_member_collaborations:'BNI 合作',bni_member_contacts:'聯絡方式',bni_need_categories:'問題類別',bni_need_members:'類別配對',bni_need_step_members:'步驟配對'};
 const AUDIT_FIELD_LABELS={name:'姓名',company:'公司',title:'標題／職稱',tagline:'專業定位',intro:'自我介紹',expertise_category:'專業類別',services:'主要服務',common_problems:'擅長處理',work_scope:'服務內容',card_json_url:'電子名片',is_published:'前台顯示',problem_keys:'問題分類',role_keys:'流程角色',description:'內容',link_url:'連結',image_url:'圖片',partner_name:'合作對象',collaboration_date:'合作日期',contact_type:'聯絡類型',label:'顯示標題',display_text:'顯示文字',url:'URL',key:'類別代碼',icon:'圖示',small:'摘要',steps:'處理步驟',sort_order:'排序',is_active:'前台顯示類別',need_key:'需求類別',member_id:'成員',step_index:'步驟'};
 async function loadAuditLogs(){
@@ -132,13 +132,13 @@ async function loadAuditLogs(){
 }
 function renderAuditLogs(){
   const filter=$('auditFilter')?.value||'all';
-  const rows=auditEvents.filter(x=>filter==='all'||(filter==='login'&&['login_success','login_failure','logout'].includes(x.event_type))||(filter==='data'&&x.event_type.startsWith('data_')));
+  const rows=auditEvents.filter(x=>filter==='all'||(filter==='login'&&['login_success','login_failure','login_blocked','logout'].includes(x.event_type))||(filter==='data'&&x.event_type.startsWith('data_')));
   $('auditList').innerHTML=rows.length?rows.map(x=>{
     const eventLabel=AUDIT_EVENT_LABELS[x.event_type]||x.event_type;
     const entity=AUDIT_ENTITY_LABELS[x.entity_type]||x.entity_type||'管理員';
     const fields=(x.changed_fields||[]).map(k=>AUDIT_FIELD_LABELS[k]||k).join('、');
     const detail=x.event_type.startsWith('data_')?[entity,x.target_label||x.entity_id||'',fields?('欄位：'+fields):''].filter(Boolean).join('｜'):(x.admin_email||x.target_label||'管理員');
-    const badgeClass=x.event_type==='login_failure'?' red':(x.event_type==='login_success'?' green':'');
+    const badgeClass=['login_failure','login_blocked'].includes(x.event_type)?' red':(x.event_type==='login_success'?' green':'');
     return `<div class="log-row"><div class="time">${fmtTime(x.created_at)}</div><div><span class="badge${badgeClass}">${esc(eventLabel)}</span></div><div>${esc(x.admin_email||'管理員')}</div><div>${esc(detail)}</div></div>`;
   }).join(''):'<div class="empty">目前沒有符合的後台操作紀錄。</div>';
 }
