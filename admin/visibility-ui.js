@@ -1,5 +1,5 @@
 (function(){
-if(!document.querySelector('link[href^="./visibility-ui.css"]')){const l=document.createElement('link');l.rel='stylesheet';l.href='./visibility-ui.css?v=20260915-1900';document.head.appendChild(l)}
+if(!document.querySelector('link[href^="./visibility-ui.css"]')){const l=document.createElement('link');l.rel='stylesheet';l.href='./visibility-ui.css?v=20260920-1805';document.head.appendChild(l)}
 const configs=[
   {id:'m_visible',host:'memberEditor'},
   {id:'cat_active',host:'categoryEditor'},
