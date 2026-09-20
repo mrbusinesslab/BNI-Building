@@ -9,6 +9,7 @@ const esc=(v='')=>String(v).replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'
 const val=id=>($(id)?.value||'').trim();
 function notice(msg,type='ok'){const el=$('globalNotice');if(!el)return;el.innerHTML=msg?`<div class="notice ${type}">${esc(msg)}</div>`:'';if(msg)setTimeout(()=>{if(el.textContent===msg)el.innerHTML=''},4500)}
 function makeClient(){sb=supabase.createClient(U,K,{auth:{persistSession:false},global:{headers:{'x-bni-admin-token':token}}})}
+async function sessionApi(action,payload={}){const res=await fetch(U+'/functions/v1/bni-admin-sessions',{method:'POST',headers:{'Content-Type':'application/json','apikey':K,'x-bni-admin-token':token},body:JSON.stringify({action,...payload})});const out=await res.json().catch(()=>({ok:false}));if(res.status===401){localStorage.removeItem('bni_admin_token');location.reload();throw new Error('unauthorized')}if(!res.ok||!out.ok)throw new Error('session_api_error');return out.data}
 async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function fmtTime(x){if(!x)return'';try{return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(x))}catch{return x}}
 function showApp(){makeClient();$('loginView').classList.add('hidden');$('appView').classList.remove('hidden')}
@@ -16,7 +17,7 @@ function switchPage(name){document.querySelectorAll('.page').forEach(x=>x.classL
 
 $('loginBtn').onclick=async()=>{const pw=val('password');if(!pw){$('loginNotice').innerHTML='<div class="notice error">請輸入密碼。</div>';return}const btn=$('loginBtn');btn.disabled=true;const hash=await sha256(pw);try{const res=await fetch(U+'/functions/v1/bni-admin-login',{method:'POST',headers:{'Content-Type':'application/json','apikey':K},body:JSON.stringify({email:EMAIL,password_sha256:hash})});const data=await res.json().catch(()=>({status:'error'}));if(data.status==='blocked'){const mins=Math.max(1,Math.ceil(Number(data.retry_after||900)/60));$('loginNotice').innerHTML='<div class="notice error">登入嘗試過多，請約 '+mins+' 分鐘後再試。</div>';return}if(data.status!=='ok'||!data.token){$('loginNotice').innerHTML='<div class="notice error">帳號或密碼錯誤。</div>';return}token=data.token;localStorage.setItem('bni_admin_token',token);showApp();await bootstrap()}catch(e){$('loginNotice').innerHTML='<div class="notice error">登入服務暫時無法使用，請稍後再試。</div>'}finally{btn.disabled=false}};
 $('password').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginBtn').click()});
-$('logoutBtn').onclick=async()=>{try{await base.rpc('bni_admin_logout',{p_token:token})}catch{}localStorage.removeItem('bni_admin_token');location.reload()};
+$('logoutBtn').onclick=async()=>{try{await sessionApi('logout')}catch{}localStorage.removeItem('bni_admin_token');location.reload()};
 document.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>switchPage(b.dataset.page));
 
 async function bootstrap(){await Promise.all([loadMembers(false),loadCategories(false)]);switchPage('dashboard')}
@@ -132,17 +133,28 @@ async function loadAuditLogs(){
 }
 function renderAuditLogs(){
   const filter=$('auditFilter')?.value||'all';
-  const rows=auditEvents.filter(x=>filter==='all'||(filter==='login'&&['login_success','login_failure','login_blocked','logout'].includes(x.event_type))||(filter==='data'&&x.event_type.startsWith('data_')));
+  const q=($('auditSearch')?.value||'').trim().toLowerCase();
+  const from=$('auditDateFrom')?.value?new Date($('auditDateFrom').value+'T00:00:00+08:00'):null;
+  const to=$('auditDateTo')?.value?new Date($('auditDateTo').value+'T23:59:59+08:00'):null;
+  const sessionTypes=['login_success','login_failure','login_blocked','logout','session_named','session_revoked','sessions_revoked'];
+  const rows=auditEvents.filter(x=>{
+    const typeOk=filter==='all'||(filter==='login'&&sessionTypes.includes(x.event_type))||(filter==='failure'&&['login_failure','login_blocked'].includes(x.event_type))||(filter==='data'&&x.event_type.startsWith('data_'))||(filter==='delete'&&x.event_type==='data_delete');
+    if(!typeOk)return false;
+    const d=new Date(x.created_at);if(from&&d<from)return false;if(to&&d>to)return false;
+    if(q){const hay=[x.admin_email,x.target_label,x.entity_id,x.entity_type,...(x.changed_fields||[])].filter(Boolean).join(' ').toLowerCase();if(!hay.includes(q))return false}
+    return true;
+  });
   $('auditList').innerHTML=rows.length?rows.map(x=>{
     const eventLabel=AUDIT_EVENT_LABELS[x.event_type]||x.event_type;
     const entity=AUDIT_ENTITY_LABELS[x.entity_type]||x.entity_type||'管理員';
     const fields=(x.changed_fields||[]).map(k=>AUDIT_FIELD_LABELS[k]||k).join('、');
-    const detail=x.event_type.startsWith('data_')?[entity,x.target_label||x.entity_id||'',fields?('欄位：'+fields):''].filter(Boolean).join('｜'):(x.admin_email||x.target_label||'管理員');
+    const detail=x.event_type.startsWith('data_')?[entity,x.target_label||x.entity_id||'',fields?('欄位：'+fields):''].filter(Boolean).join('｜'):(x.target_label||x.admin_email||'管理員');
     const badgeClass=['login_failure','login_blocked'].includes(x.event_type)?' red':(x.event_type==='login_success'?' green':'');
     return `<div class="log-row"><div class="time">${fmtTime(x.created_at)}</div><div><span class="badge${badgeClass}">${esc(eventLabel)}</span></div><div>${esc(x.admin_email||'管理員')}</div><div>${esc(detail)}</div></div>`;
   }).join(''):'<div class="empty">目前沒有符合的後台操作紀錄。</div>';
 }
-if($('auditFilter'))$('auditFilter').onchange=renderAuditLogs;
+['auditFilter','auditSearch','auditDateFrom','auditDateTo'].forEach(id=>{if($(id))$(id).oninput=renderAuditLogs});
+if($('auditClearBtn'))$('auditClearBtn').onclick=()=>{if($('auditFilter'))$('auditFilter').value='all';if($('auditSearch'))$('auditSearch').value='';if($('auditDateFrom'))$('auditDateFrom').value='';if($('auditDateTo'))$('auditDateTo').value='';renderAuditLogs()};
 
 function sessionDeviceLabel(ua){
   const s=String(ua||'');
@@ -151,10 +163,7 @@ function sessionDeviceLabel(ua){
   return os+' · '+browser;
 }
 async function loadSessions(){
-  await sb.rpc('bni_admin_update_current_session_device',{p_user_agent:navigator.userAgent});
-  const {data,error}=await sb.rpc('bni_admin_list_sessions');
-  if(error)return notice('登入裝置讀取失敗：'+error.message,'error');
-  const rows=data||[];
+  let rows=[];try{rows=await sessionApi('list')||[]}catch(e){return notice('登入裝置讀取失敗。','error')}
   const current=rows.filter(x=>x.is_current);
   const others=rows.filter(x=>!x.is_current);
 
@@ -165,7 +174,7 @@ async function loadSessions(){
       <div class="session-main">
         <div class="session-name-row"><b>${esc(displayName)}</b><span class="badge${x.is_current?' green':''}">${x.is_current?'目前裝置':'其他裝置'}</span></div>
         <div class="session-device">${esc(autoName)}${x.device_name?'':' · 尚未命名'}</div>
-        <div class="session-meta">登入時間：${esc(fmtTime(x.created_at))}　登入期限：${esc(fmtTime(x.expires_at))}</div>
+        <div class="session-meta">登入時間：${esc(fmtTime(x.created_at))}　最後活動：${esc(fmtTime(x.last_seen_at||x.created_at))}　登入期限：${esc(fmtTime(x.expires_at))}</div>
       </div>
       <div class="session-actions">
         <button class="btn ghost" data-name-session="${esc(x.session_id)}" data-current-name="${esc(x.device_name||'')}">命名</button>
@@ -191,8 +200,7 @@ async function loadSessions(){
     const clean=name.trim();
     if(!clean)return notice('裝置名稱不能空白。','error');
     btn.disabled=true;
-    const {data,error}=await sb.rpc('bni_admin_name_session',{p_session_id:btn.dataset.nameSession,p_device_name:clean});
-    if(error||data!==true){btn.disabled=false;return notice('裝置命名失敗。','error')}
+    let data=false;try{data=await sessionApi('name',{session_id:btn.dataset.nameSession,device_name:clean})}catch{}if(data!==true){btn.disabled=false;return notice('裝置命名失敗。','error')}
     notice('裝置名稱已儲存。');
     await loadSessions();
   });
@@ -200,8 +208,7 @@ async function loadSessions(){
   $('sessionList').querySelectorAll('[data-revoke-session]').forEach(btn=>btn.onclick=async()=>{
     if(!confirm('確定要登出這個裝置？'))return;
     btn.disabled=true;
-    const {data,error}=await sb.rpc('bni_admin_revoke_session',{p_session_id:btn.dataset.revokeSession});
-    if(error||data!==true){btn.disabled=false;return notice('登出此裝置失敗。','error')}
+    let data=false;try{data=await sessionApi('revoke',{session_id:btn.dataset.revokeSession})}catch{}if(data!==true){btn.disabled=false;return notice('登出此裝置失敗。','error')}
     notice('已登出指定裝置。');
     await loadSessions();
   });
