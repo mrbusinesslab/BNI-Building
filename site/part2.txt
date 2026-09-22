@@ -38,13 +38,13 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar"><div class="brand"><div class="brandmark">建</div><div>磐石砌好厝<small>工程資源中心</small></div></div><a class="tag" href="https://mrbusinesslab.github.io/BNI-Building/admin/" style="text-decoration:none">後台管理</a></div>
+  <div class="topbar"><div class="brand"><div class="brandmark">砌</div><div>砌好厝3.0<small>工程資源中心</small></div></div><a class="tag" href="https://mrbusinesslab.github.io/BNI-Building/admin/" style="text-decoration:none">後台管理</a></div>
   <section class="hero"><div><div class="eyebrow">從「找人」變成「解決問題」</div><h1>你今天要解決<br>什麼工程問題？</h1><p>先選擇你的需求，我們會整理可能需要的工種與適合的專業成員。</p></div></section>
   <section class="section"><div class="section-head"><div><h2>選擇你的需求</h2><div class="sub">點一個分類，看系統怎麼分流</div></div></div><div class="needs" id="needs"></div></section>
   <section class="section"><div class="solution"><div class="panel"><h3 id="solutionTitle">漏水／防水</h3><p id="solutionText">這類案件通常會先從漏水檢測開始，再依現場狀況安排防水、泥作或油漆修繕。</p></div><div class="panel"><h3>可能的處理流程</h3><div class="steps" id="steps"></div></div></div></section>
   <section class="section match-zone"><div class="match-zone-head"><div><h2>適合你的專業成員</h2><div id="matchCount" style="display:none"></div></div><div class="match-badge">MATCH</div></div><div class="matched-flow" id="members"></div></section>
   <section class="section directory-section">
-    <div class="section-head"><div><h2>建築組專業成員</h2></div></div>
+    <div class="section-head"><div><h2>砌好厝3.0 專業成員</h2></div></div>
     <div class="members directory-grid">
       <div class="member directory-card" onclick="openProfile('鍾師富')"><div class="company">詠順工程行</div><div class="name">鍾師富</div><div class="desc">科技抓漏，杜絕漏水</div></div>
       <div class="member directory-card"><div class="company">尚晉通科技企業社</div><div class="name">邱一晉</div><div class="desc">弱電工程｜監視器、網路與設備整合</div></div>
@@ -65,7 +65,7 @@
       <div class="member directory-card"><div class="company">快訊機電工程有限公司</div><div class="name">姚羿汝</div><div class="desc">機電工程｜消防、儀控與環控設備</div></div>
     </div>
   </section>
-  <div class="footer">MR BUSINESS LAB｜建築組產業入口概念版</div>
+  <div class="footer">MR BUSINESS LAB｜砌好厝3.0</div>
 </div>
 <script>
 const allMembers = [

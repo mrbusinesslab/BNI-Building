@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>磐石砌好厝｜工程資源中心</title>
+<title>砌好厝3.0｜工程資源中心</title>
 <style>
   :root{
     --bg:#f4f7f8;
