@@ -40,6 +40,24 @@
 <div class="wrap">
   <div class="topbar"><div class="brand"><div class="brandmark">砌</div><div>砌好厝3.0<small>工程資源中心</small></div></div><a class="tag" href="https://mrbusinesslab.github.io/BNI-Building/admin/" style="text-decoration:none">後台管理</a></div>
   <section class="hero"><div><div class="eyebrow">從「找人」變成「解決問題」</div><h1>你今天要解決<br>什麼工程問題？</h1><p>先選擇你的需求，我們會整理可能需要的工種與適合的專業成員。</p></div></section>
+  <section class="assistant-search-card" aria-labelledby="assistantSearchTitle">
+    <div class="assistant-search-copy">
+      <div class="assistant-search-kicker">砌好厝3.0 問題小幫手</div>
+      <h2 id="assistantSearchTitle">不知道該找誰？直接描述你的問題</h2>
+      <p>告訴我們現場遇到的狀況，小幫手會協助判斷需求，並推薦可能適合的專業成員。</p>
+    </div>
+    <form class="assistant-search-form" id="assistantSearchForm">
+      <label class="sr-only" for="assistantSearchInput">描述你的工程或空間問題</label>
+      <input id="assistantSearchInput" type="text" autocomplete="off" placeholder="例如：浴室牆角一直滲水，不知道該先找誰？">
+      <button type="submit">開始詢問 <span aria-hidden="true">→</span></button>
+    </form>
+    <div class="assistant-search-examples" aria-label="常見問題範例">
+      <span>可以這樣問：</span>
+      <button type="button" data-assistant-example="浴室牆角一直滲水，不知道該先找誰？">浴室牆角滲水</button>
+      <button type="button" data-assistant-example="老屋想翻修，應該先從哪裡開始？">老屋翻修怎麼開始</button>
+      <button type="button" data-assistant-example="辦公室需要重新配置燈光和網路，要找哪些專業？">辦公室燈光與網路</button>
+    </div>
+  </section>
   <section class="section"><div class="section-head"><div><h2>選擇你的需求</h2><div class="sub">點一個分類，看系統怎麼分流</div></div></div><div class="needs" id="needs"></div></section>
   <section class="section"><div class="solution"><div class="panel"><h3 id="solutionTitle">漏水／防水</h3><p id="solutionText">這類案件通常會先從漏水檢測開始，再依現場狀況安排防水、泥作或油漆修繕。</p></div><div class="panel"><h3>可能的處理流程</h3><div class="steps" id="steps"></div></div></div></section>
   <section class="section match-zone"><div class="match-zone-head"><div><h2>適合你的專業成員</h2><div id="matchCount" style="display:none"></div></div><div class="match-badge">MATCH</div></div><div class="matched-flow" id="members"></div></section>
