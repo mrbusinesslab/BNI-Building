@@ -54,7 +54,7 @@
     <div class="assistant-search-examples" aria-label="常見問題範例">
       <span>可以這樣問：</span>
       <button type="button" data-assistant-example="浴室牆角一直滲水，不知道該先找誰？">浴室牆角滲水</button>
-      <button type="button" data-assistant-example="老屋想翻修，應該先從哪裡開始？">老屋翻修怎麼開始</button>
+      <button type="button" data-assistant-example="老屋翻修怎麼開始？">老屋翻修怎麼開始</button>
       <button type="button" data-assistant-example="辦公室需要重新配置燈光和網路，要找哪些專業？">辦公室燈光與網路</button>
     </div>
   </section>
