@@ -12,7 +12,6 @@ const needsData = [
   {key:"wood_furniture", icon:"🪵", title:"木作家具", small:"木作、地板、廚具、辦公家具", text:"需要木作、收納、木地板、廚房或辦公家具時，依空間尺寸與使用需求媒合對應專業。", steps:["需求丈量","材質／配置規劃","製作施工","安裝調整"]},
   {key:"lighting_curtains", icon:"💡", title:"燈光窗簾", small:"照明、智慧燈光、窗簾、百葉", text:"針對照明、採光、遮光與隱私需求，媒合燈光、智慧照明與窗簾相關專業。", steps:["空間需求","燈光／窗飾規劃","安裝配置","現場調整"]},
   {key:"paint", icon:"🎨", title:"油漆翻新", small:"粉刷、藝術漆、牆面修復", text:"針對牆面老化、重新粉刷、藝術漆或空間換色，先確認牆況，再安排修補與油漆施工。", steps:["牆況檢查","基底修補","底漆","面漆"]},
-  {key:"unknown", icon:"❓", title:"不知道找誰", small:"直接問建築小幫手", text:"不用先判斷工種，直接描述你的問題，由建築小幫手協助釐清需求並推薦適合的專業成員。", steps:["描述問題","釐清需求","推薦專業","找到成員"]}
 ];
 
 const needsEl = document.getElementById("needs");
