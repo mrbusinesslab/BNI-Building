@@ -9,23 +9,25 @@
   let currentIntent='';
   const intentButtons=[['找人','person_search'],['找專業','profession_search'],['解決問題','problem_solve']];
   const answerRules=[
-    {words:['廣告架','招牌架','廣告招牌','招牌','燈箱','展架','帆布','大圖輸出','店面看板','門面廣告'],names:['游宛齊'],reply:'這類需求屬於廣告招牌與品牌輸出，可由招牌規劃、製作到現場安裝開始處理：'},
-    {words:['監視器','攝影機','網路不通','wifi','wi-fi','弱電','網路配置','網路建置'],names:['邱一晉'],reply:'這類需求屬於監視器、網路或弱電工程，可先確認現場設備與網路配置：'},
+    {words:['廣告架','招牌架','廣告招牌','招牌','燈箱','展架','帆布','大圖輸出','店面看板','門面廣告','店面開幕','新店開幕'],names:['游宛齊'],reply:'這類需求屬於廣告招牌與品牌輸出，可由招牌規劃、製作到現場安裝開始處理：'},
+    {words:['監視器','攝影機','監視器沒畫面','攝影機沒畫面','網路不通','網路很慢','wifi很慢','wifi','wi-fi','弱電','網路配置','網路建置'],names:['邱一晉'],reply:'這類需求屬於監視器、網路或弱電工程，可先確認現場設備與網路配置：'},
     {words:['nas','檔案共享','資料備份','資料儲存','公司檔案','權限管理'],names:['黃致為'],reply:'這類需求屬於 NAS、資料儲存與辦公資訊環境規劃：'},
-    {words:['漏水','滲水','壁癌','抓漏','漏水來源'],names:['鍾師富','楊庭瑞'],reply:'建議先確認漏水來源，再決定防水或後續修繕，避免直接施工後仍反覆漏水：'},
-    {words:['水電','水管','跳電','插座','配電','燈壞','沒電'],names:['林佑丞','周昱勳'],reply:'這類需求可先由水電專業確認現場狀況與施工範圍：'},
+    {words:['漏水','滲水','壁癌','抓漏','漏水來源','牆壁濕','牆面濕','牆壁發霉','牆面發霉','天花板發霉'],names:['鍾師富','楊庭瑞'],reply:'牆面潮濕或發霉可能與滲水、管線或結露有關，建議先確認來源，再決定防水或後續修繕：'},
+    {words:['水電','水管','跳電','一直跳電','插座','插座不夠','增加插座','配電','燈壞','沒電'],names:['林佑丞','周昱勳'],reply:'這類需求可先由水電專業確認現場狀況、用電安全與施工範圍：'},
     {words:['老屋翻修','老屋整修','舊屋翻修','整屋翻修'],names:['阮凱程','陳奕訢','蔡宗龍','許清皓'],reply:'老屋翻修建議先做屋況與需求評估，再安排設計、統包及後續工種：'},
+    {words:['重新裝潢','重新裝修','要裝潢','設計師還是統包','設計師或統包','不知道找設計師','不知道找統包'],names:['阮凱程','陳奕訢','蔡宗龍','許清皓'],reply:'如果需求還不明確，可先由設計或統包協助盤點空間、預算與工程範圍：'},
     {words:['室內設計','空間設計','格局規劃','動線規劃','新成屋設計','商空設計','店面設計'],names:['陳奕訢','蔡宗龍','許清皓'],reply:'這類需求適合先從空間、動線與使用需求進行整體規劃：'},
     {words:['統包','多工種','整體工程'],names:['阮凱程'],reply:'需要整合多個工種時，可先由裝修統包協助盤點項目、順序與現場協調：'},
-    {words:['拆除','清運','打除','鷹架'],names:['賴昺諺'],reply:'這類需求屬於拆除、清運或鷹架工程，可先進行現場評估：'},
+    {words:['拆除','拆舊裝潢','舊裝潢拆除','清運','廢棄物清運','裝潢廢棄物','打除','鷹架'],names:['賴昺諺'],reply:'這類需求屬於拆除、清運或鷹架工程，可先進行現場評估：'},
     {words:['泥作','砌磚','打底','貼磚','磁磚修補'],names:['王吉豐'],reply:'這類需求屬於泥作與基礎修繕，可先確認牆地面及後續工序：'},
-    {words:['油漆','粉刷','藝術漆','牆面翻新','漆面剝落'],names:['蘇祺傑'],reply:'這類需求屬於油漆與牆面翻新，施工前會先確認牆況與基底：'},
-    {words:['窗簾','百葉窗','遮光','窗飾','隱私不足'],names:['何美儀'],reply:'這類需求可從採光、遮光、隱私與窗飾風格一起規劃：'},
+    {words:['油漆','粉刷','藝術漆','牆面翻新','牆面掉漆','油漆剝落','漆面剝落','牆壁換顏色','牆面換顏色','房間換顏色'],names:['蘇祺傑'],reply:'這類需求屬於油漆與牆面翻新，施工前會先確認牆況與基底：'},
+    {words:['窗簾','百葉窗','遮光','遮光窗簾','西曬','房間太熱','窗邊太熱','窗飾','隱私不足'],names:['何美儀'],reply:'這類需求可從採光、遮光、隔熱、隱私與窗飾風格一起規劃：'},
     {words:['智慧照明','調光','情境燈光','環控'],names:['蔡榮德'],reply:'這類需求屬於智慧照明、調光控制與環控系統整合：'},
-    {words:['燈光規劃','燈具','照明','太暗','眩光','燈位'],names:['廖嘉暉','蔡榮德'],reply:'這類需求可依空間用途、亮度、色溫與控制方式規劃照明：'},
-    {words:['木地板','地板更新','地板施工'],names:['吳玫勳'],reply:'這類需求可先確認現場、材質與使用需求，再安排木地板選配與施工：'},
-    {words:['廚具','廚房規劃','廚房翻新','廚房收納'],names:['楊正綱'],reply:'這類需求可從廚房配置、使用機能與設備尺寸開始規劃：'},
-    {words:['系統櫃','客製櫃','板材加工','cnc','櫃體'],names:['姚偉婷','蔡志瑄'],reply:'這類需求屬於木作、板材加工或客製櫃體，可先確認圖面與尺寸：'},
+    {words:['燈光規劃','燈具','照明','房間太暗','空間太暗','燈光不好看','燈光太暗','太暗','眩光','燈位'],names:['廖嘉暉','蔡榮德'],reply:'這類需求可依空間用途、亮度、色溫與控制方式規劃照明：'},
+    {words:['木地板','地板損壞','地板壞掉','地板更新','換地板','地板施工'],names:['吳玫勳'],reply:'這類需求可先確認現場、材質與使用需求，再安排木地板選配與施工：'},
+    {words:['廚具','廚房不好用','廚房難用','換廚具','廚房規劃','廚房翻新','廚房收納'],names:['楊正綱'],reply:'這類需求可從廚房配置、使用機能與設備尺寸開始規劃：'},
+    {words:['系統櫃','客製櫃','收納櫃','做收納','增加收納','板材加工','cnc','櫃體'],names:['姚偉婷','蔡志瑄'],reply:'這類需求屬於木作、板材加工或客製櫃體，可先確認圖面與尺寸：'},
+    {words:['辦公室搬家','辦公室搬遷','新辦公室','辦公室桌椅和網路','辦公室桌椅網路'],names:['邱一晉','黃致為','賴信綜'],reply:'辦公室搬遷通常需要一起盤點網路弱電、資料環境與辦公家具配置：'},
     {words:['辦公家具','辦公桌','辦公椅','會議桌'],names:['賴信綜'],reply:'這類需求可依人數、空間尺寸與工作方式規劃辦公家具：'},
     {words:['綠電','能源設備','電纜','用電設備檢驗'],names:['陳緯達'],reply:'這類需求屬於綠電、能源與用電設備工程：'},
     {words:['消防','機電','儀控','消防設備'],names:['姚羿汝'],reply:'這類需求屬於消防、機電、儀控或環控設備工程：'},
@@ -46,7 +48,7 @@
   function showMembers(list,prefix){const visible=getMembers(),visibleIds=new Set(visible.map(m=>m.id)),uniq=[];const seen=new Set();list.forEach(m=>{if(m&&visibleIds.has(m.id)&&!seen.has(m.id)){seen.add(m.id);uniq.push(m)}});if(!uniq.length){showFallback();return}addMsg(prefix||`找到 ${uniq.length} 位可能適合的成員：`);const body=document.getElementById('assistantBody');uniq.slice(0,8).forEach(m=>{const d=document.createElement('div');d.className='assistant-member';d.innerHTML=`<b>${m.name}｜${m.company||''}</b><span>${m.desc||''}</span><button data-member="${m.name}">查看人物</button>`;body.appendChild(d)});body.scrollTop=body.scrollHeight}
   function findPeople(q){const x=q.toLowerCase();return getMembers().filter(m=>String(m.name||'').toLowerCase().includes(x)||String(m.company||'').toLowerCase().includes(x))}
   function findProfession(q){const x=q.toLowerCase().replace(/\s+/g,'');const direct=getMembers().filter(m=>memberSearchText(m).replace(/\s+/g,'').includes(x));if(direct.length)return direct;const tokens=[...new Set(q.toLowerCase().split(/[\s、，,。\/｜]+/).map(s=>s.trim()).filter(s=>s.length>=2&&!['我要','我想','幫我','請問','找人','找專業'].includes(s)))];if(!tokens.length)return[];return getMembers().map(m=>({m,score:tokens.reduce((n,t)=>n+(memberSearchText(m).includes(t)?1:0),0)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).map(x=>x.m)}
-  function normalizeQuestion(v){return String(v||'').toLowerCase().replace(/[\s、，,。！？?\/｜_-]+/g,'').replace(/請問|我想要|我想|想要|需要|應該|怎麼|如何|可以|能不能|幫我|麻煩|找誰|先從哪裡開始|從哪裡開始|想/g,'')}
+  function normalizeQuestion(v){return String(v||'').toLowerCase().replace(/[\s、，,。！？?\/｜_-]+/g,'').replace(/請問|我想要|我想|想要|需要|應該|怎麼|如何|可以|能不能|幫我|麻煩|找誰|先從哪裡開始|從哪裡開始|想|要/g,'')}
   function answerByRule(q){const x=normalizeQuestion(q);const matches=answerRules.map(rule=>({rule,score:Math.max(0,...rule.words.map(w=>{const key=normalizeQuestion(w);return x.includes(key)?key.length:0}))})).filter(v=>v.score>0).sort((a,b)=>b.score-a.score);if(!matches.length)return false;const top=matches[0].rule,byName=new Map(getMembers().map(m=>[m.name,m])),list=top.names.map(n=>byName.get(n)).filter(Boolean);if(!list.length)return false;showMembers(list,top.reply);track('chat_rule_match',{intent:'problem_solve',query_text:q,meta:{rule:top.words[0],members:top.names}});return true}
   function membersForNeed(key,stepIndex=null){const members=getMembers(),byId=new Map(members.map(m=>[m.id,m]));let rows=getStepRows(key);if(stepIndex!==null)rows=rows.filter(r=>Number(r.step_index)===Number(stepIndex));rows=[...rows].sort((a,b)=>(a.step_index-b.step_index)||((a.sort_order||0)-(b.sort_order||0)));const out=[],seen=new Set();rows.forEach(r=>{const m=byId.get(r.member_id);if(m&&!seen.has(m.id)){seen.add(m.id);out.push(m)}});return out}
   function scoreNeed(q,n){const x=q.toLowerCase();let score=0;const title=String(n.title||'').toLowerCase(),small=String(n.small||'').toLowerCase(),text=String(n.text||'').toLowerCase();if(title&&x.includes(title))score+=12;if(small&&x.includes(small))score+=4;const steps=Array.isArray(n.steps)?n.steps:[];steps.forEach(s=>{const parts=String(s).toLowerCase().split(/[／/、與和\s]+/).filter(w=>w.length>=2);parts.forEach(w=>{if(x.includes(w))score+=5})});const words=(title+' '+small+' '+text).split(/[\s、，,。／/｜]+/).filter(w=>w.length>=2);words.forEach(w=>{if(x.includes(w))score+=2});return score}
