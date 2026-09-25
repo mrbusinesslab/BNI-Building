@@ -58,6 +58,11 @@
       <button type="button" data-assistant-example="辦公室需要重新配置燈光和網路，要找哪些專業？">辦公室燈光與網路</button>
     </div>
   </section>
+  <section class="assistant-steps" aria-label="砌好厝3.0 使用方式">
+    <div class="assistant-step"><span>1</span><div><b>描述問題</b><small>用平常說話的方式輸入</small></div></div>
+    <div class="assistant-step"><span>2</span><div><b>查看推薦</b><small>找到可能適合的專業成員</small></div></div>
+    <div class="assistant-step"><span>3</span><div><b>開啟資料</b><small>了解服務並直接聯絡</small></div></div>
+  </section>
   <section class="section"><div class="section-head"><div><h2>選擇你的需求</h2><div class="sub">點一個分類，看系統怎麼分流</div></div></div><div class="needs" id="needs"></div></section>
   <section class="section"><div class="solution"><div class="panel"><h3 id="solutionTitle">漏水／防水</h3><p id="solutionText">這類案件通常會先從漏水檢測開始，再依現場狀況安排防水、泥作或油漆修繕。</p></div><div class="panel"><h3>可能的處理流程</h3><div class="steps" id="steps"></div></div></div></section>
   <section class="section match-zone"><div class="match-zone-head"><div><h2>適合你的專業成員</h2><div id="matchCount" style="display:none"></div></div><div class="match-badge">MATCH</div></div><div class="matched-flow" id="members"></div></section>
