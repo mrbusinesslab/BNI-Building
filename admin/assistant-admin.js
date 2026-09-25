@@ -19,5 +19,6 @@ async function handleReportClick(e){const answer=e.target.closest('[data-report-
 function normalize(s){return String(s||'').toLowerCase().replace(/[\s，,。！？!?、／/\-]/g,'')}
 function findRule(q){const x=normalize(q);return assistantRules.filter(r=>r.is_active).map(rule=>({rule,score:Math.max(0,...(rule.keywords||[]).map(w=>{const k=normalize(w);return x.includes(k)?k.length:0}))})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score)[0]?.rule||null}
 function testRule(){const q=a('assistantTestInput').value.trim(),out=a('assistantTestResult');if(!q)return;const rule=findRule(q);out.classList.remove('hidden');out.innerHTML=rule?`<b>可以回答</b><div>${esc(rule.reply)}</div><div class="assistant-test-members">${(rule.member_names||[]).map(n=>`<span>${esc(n)}</span>`).join('')||'<span>未指定推薦成員</span>'}</div><p class="muted">命中關鍵字：${esc((rule.keywords||[]).filter(k=>normalize(q).includes(normalize(k))).join('、'))}</p>`:'<b style="color:var(--danger)">目前無法回答</b><div>這個問題目前沒有命中任何回答內容，可到「回答內容」新增關鍵字與回答。</div>'}
-install();
+function arrangeEditorHeader(){const title=a('assistantRuleEditorTitle'),input=a('assistantRuleActive');if(!title||!input)return;const label=input.closest('label');label.lastChild.textContent='前台顯示';const head=document.createElement('div');head.className='assistant-editor-head';title.parentElement.insertBefore(head,title);head.append(title,label)}
+install();arrangeEditorHeader();
 })();
