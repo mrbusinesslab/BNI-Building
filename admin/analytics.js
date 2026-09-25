@@ -1,6 +1,6 @@
 (function(){
-const EVENT_LABELS={member_card_click:'人物查看',contact_click:'聯絡方式點擊',chat_member_open:'小幫手推薦人物',chat_open:'開啟小幫手',chat_message:'使用者詢問',chat_intent:'選擇功能',chat_problem_pick:'選擇需求',need_select:'需求類別點擊',chat_fallback:'無法判斷'};
-const EVENT_ICONS={member_card_click:'👤',contact_click:'☎',chat_member_open:'↗',chat_open:'💬',chat_message:'✎',chat_intent:'⌘',chat_problem_pick:'✓',need_select:'▦',chat_fallback:'?'};
+const EVENT_LABELS={member_card_click:'人物查看',contact_click:'聯絡方式點擊',assistant_contact_click:'小幫手直接聯絡',chat_member_open:'小幫手推薦人物',chat_open:'開啟小幫手',chat_message:'使用者詢問',chat_intent:'選擇功能',chat_problem_pick:'選擇需求',need_select:'需求類別點擊',chat_fallback:'無法判斷',chat_unanswered_report:'問題回報'};
+const EVENT_ICONS={member_card_click:'👤',contact_click:'☎',assistant_contact_click:'☎',chat_member_open:'↗',chat_open:'💬',chat_message:'✎',chat_intent:'⌘',chat_problem_pick:'✓',need_select:'▦',chat_fallback:'?',chat_unanswered_report:'!'};
 function loadCss(){if(document.querySelector('link[href="./analytics.css"]'))return;const l=document.createElement('link');l.rel='stylesheet';l.href='./analytics.css';document.head.appendChild(l)}
 function installUi(){
  loadCss();
