@@ -42,7 +42,7 @@
   <section class="hero"><div><div class="eyebrow">從「找人」變成「解決問題」</div><h1>你今天要解決<br>什麼工程問題？</h1><p>先選擇你的需求，我們會整理可能需要的工種與適合的專業成員。</p></div></section>
   <section class="assistant-search-card" aria-labelledby="assistantSearchTitle">
     <div class="assistant-search-copy">
-      <div class="assistant-search-kicker">砌好厝3.0 問題小幫手</div>
+      <div class="assistant-search-kicker">砌好厝3.0 建築小幫手</div>
       <h2 id="assistantSearchTitle">不知道該找誰？直接描述你的問題</h2>
       <p>告訴我們現場遇到的狀況，小幫手會協助判斷需求，並推薦可能適合的專業成員。</p>
     </div>
