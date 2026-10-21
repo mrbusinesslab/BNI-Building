@@ -18,3 +18,9 @@
   .member-status-item .member-missing{grid-column:1}
   .member-status-item .status-badge{position:absolute;grid-column:auto;grid-row:auto;top:10px;right:10px}
 }
+
+.member-visibility-filters{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 0 10px;padding:4px;background:#eef3f4;border:1px solid #dce6e8;border-radius:11px}
+.member-visibility-filters button{min-width:0;padding:7px 5px;border:1px solid transparent;border-radius:8px;background:transparent;color:#64757a;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.member-visibility-filters button b{display:inline-block;min-width:18px;margin-left:2px;padding:1px 5px;border-radius:999px;background:#dbe5e7;color:#52656b;font-size:10px}
+.member-visibility-filters button.active{background:#fff;border-color:#cbdadd;color:#0d5368;box-shadow:0 1px 3px rgba(20,55,65,.08)}
+.member-visibility-filters button.active b{background:#dff1ec;color:#247058}
