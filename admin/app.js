@@ -211,4 +211,4 @@ async function loadSessions(){
   });
 }
 
-(async()=>{if(token){showApp();await bootstrap()}})();
+(async()=>{if(!token)return;try{await sessionApi('list');showApp();await bootstrap()}catch(e){if(String(e?.message||e)!=='unauthorized'){$('loginNotice').innerHTML='<div class="notice error">登入狀態驗證失敗，請重新登入。</div>';localStorage.removeItem('bni_admin_token');token=''}}})();
