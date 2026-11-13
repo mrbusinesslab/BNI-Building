@@ -14,6 +14,10 @@ function closeProfile(options={}){
   document.title='砌好厝3.0｜工程資源中心';
   if(options.updateUrl===false)return;
   const url=new URL(window.location.href);
+  if(/\/member\/\d+\.html$/.test(url.pathname)){
+    if(window.history.state?.bniMemberOverlay){window.history.back();return}
+    window.history.replaceState(null,'','/BNI-Building/');return;
+  }
   if(!url.searchParams.has('member'))return;
   if(window.history.state?.bniMemberOverlay){window.history.back();return}
   url.searchParams.delete('member');

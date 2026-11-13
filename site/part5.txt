@@ -127,8 +127,12 @@ function renderProfessionalDetails(row){
   const scopeHtml=scope?(hasFlow?`<div class="professional-block"><div class="professional-detail-label">服務流程</div><div class="professional-flow">${flow.map((x,i)=>`${i?'<span class="professional-flow-arrow">→</span>':''}<span class="professional-flow-step">${esc(x)}</span>`).join('')}</div></div>`:`<div class="professional-block"><div class="professional-detail-label">常見施工／服務內容</div><div class="professional-text">${esc(scope)}</div></div>`):'';
   wrap.innerHTML=categoryHtml+serviceHtml+problemHtml+scopeHtml;
 }
+function profileNumberFromUrl(){
+  const url=new URL(window.location.href);
+  return url.pathname.match(/\/member\/(\d{1,5})\.html$/)?.[1] || url.searchParams.get('member');
+}
 function memberFromProfileUrl(){
-  const number=new URL(window.location.href).searchParams.get('member');
+  const number=profileNumberFromUrl();
   if(!number||!/^[0-9]{1,5}$/.test(number))return null;
   for(const [name,profile] of backendProfiles){
     if(Number(profile.member?.member_no)===Number(number))return name;
@@ -142,10 +146,8 @@ openProfile=async function(name,options={}){
   const number=Number(row.member_no);
   if(options.updateUrl!==false&&Number.isInteger(number)&&number>0){
     const url=new URL(window.location.href);
-    if(url.searchParams.get('member')!==String(number).padStart(2,'0')){
-      url.searchParams.set('member',String(number).padStart(2,'0'));
-      window.history.pushState({bniMemberOverlay:true},'',url.pathname+url.search+url.hash);
-    }
+    const memberPath='/BNI-Building/member/'+String(number).padStart(2,'0')+'.html';
+    if(url.pathname!==memberPath)window.history.pushState({bniMemberOverlay:true},'',memberPath);
   }
   document.title=name+'｜砌好厝3.0';
 
@@ -183,12 +185,16 @@ window.addEventListener('popstate',()=>{
 });
 window.addEventListener('DOMContentLoaded',async()=>{
   await loadBackendProfiles();
-  const requested=new URL(window.location.href).searchParams.get('member');
+  const requested=profileNumberFromUrl();
   if(requested){
     const name=memberFromProfileUrl();
-    if(name)openProfile(name,{updateUrl:false});
-    else{
+    if(name){
+      const number=String(Number(requested)).padStart(2,'0');
+      if(new URL(location.href).searchParams.has('member'))history.replaceState(null,'','/BNI-Building/member/'+number+'.html');
+      openProfile(name,{updateUrl:false});
+    }else{
       const url=new URL(window.location.href);
+      if(/\/member\/\d+\.html$/.test(url.pathname))url.pathname='/BNI-Building/';
       url.searchParams.delete('member');
       window.history.replaceState(null,'',url.pathname+url.search+url.hash);
     }
