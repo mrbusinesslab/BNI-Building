@@ -8,9 +8,38 @@ function syncDirectoryCardsInteractivity(){
     else card.style.cursor='default';
   });
 }
-function closeProfile(){document.getElementById('profileOverlay').classList.remove('open');document.body.style.overflow=''}
+function closeProfile(options={}){
+  document.getElementById('profileOverlay').classList.remove('open');
+  document.body.style.overflow='';
+  document.title='砌好厝3.0｜工程資源中心';
+  if(options.updateUrl===false)return;
+  const url=new URL(window.location.href);
+  if(!url.searchParams.has('member'))return;
+  if(window.history.state?.bniMemberOverlay){window.history.back();return}
+  url.searchParams.delete('member');
+  window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+}
+function profileShareUrl(){
+  const url=new URL(window.location.href);
+  return url.href;
+}
+async function shareProfileLink(){
+  const url=profileShareUrl();
+  const name=document.getElementById('profileName')?.textContent?.trim()||'專業成員';
+  const btn=document.getElementById('shareProfileBtn');
+  if(navigator.share){
+    try{await navigator.share({title:name+'｜砌好厝3.0',text:'查看'+name+'的專業服務與聯絡方式',url});return}
+    catch(e){if(e.name==='AbortError')return}
+  }
+  let copied=false;
+  try{await navigator.clipboard.writeText(url);copied=true}catch(e){
+    const area=document.createElement('textarea');area.value=url;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();
+    try{copied=document.execCommand('copy')}catch(err){}area.remove();
+  }
+  if(btn){btn.textContent=copied?'已複製連結':'請複製網址列連結';setTimeout(()=>{btn.textContent='分享連結'},2200)}
+}
 function closeProfileOnBackdrop(e){if(e.target.id==='profileOverlay')closeProfile()}
 </script>
-<div class="profile-overlay" id="profileOverlay" onclick="closeProfileOnBackdrop(event)"><div class="profile-panel"><div class="profile-hero"><div><div class="company" id="profileCompany"></div><div class="profile-name" id="profileName"></div><div class="profile-tagline" id="profileTagline"></div></div><button class="close-profile" onclick="closeProfile()">×</button></div><div class="profile-body"><div class="profile-section contact-section" id="contactSection"><div class="profile-section-title-row"><div><h3>聯絡方式</h3></div></div><div class="contact-actions" id="profileContacts"></div></div><div class="profile-section is-hidden" id="professionalSection"><h3>專業服務</h3><div class="professional-details" id="professionalDetails"></div></div><div class="profile-section" id="introSection"><h3>自我介紹</h3><p id="profileIntro"></p></div><div class="profile-grid"><div class="profile-section profile-card-showcase"><div class="profile-section-title-row"><div><h3>電子名片</h3></div></div><div class="ecard-gallery" id="ecardGallery"></div></div></div><div class="profile-section" id="caseSection"><h3>案例</h3><div class="case-list" id="profileCases"></div></div><div class="profile-section" id="bniSection"><h3>近期 BNI 合作</h3><div class="bni-list" id="profileBNI"></div></div></div></div></div>
+<div class="profile-overlay" id="profileOverlay" onclick="closeProfileOnBackdrop(event)"><div class="profile-panel"><div class="profile-hero"><div><div class="company" id="profileCompany"></div><div class="profile-name" id="profileName"></div><div class="profile-tagline" id="profileTagline"></div></div><div class="profile-hero-actions"><button class="share-profile" id="shareProfileBtn" type="button" onclick="shareProfileLink()">分享連結</button><button class="close-profile" type="button" aria-label="關閉人物頁" onclick="closeProfile()">×</button></div></div><div class="profile-body"><div class="profile-section contact-section" id="contactSection"><div class="profile-section-title-row"><div><h3>聯絡方式</h3></div></div><div class="contact-actions" id="profileContacts"></div></div><div class="profile-section is-hidden" id="professionalSection"><h3>專業服務</h3><div class="professional-details" id="professionalDetails"></div></div><div class="profile-section" id="introSection"><h3>自我介紹</h3><p id="profileIntro"></p></div><div class="profile-grid"><div class="profile-section profile-card-showcase"><div class="profile-section-title-row"><div><h3>電子名片</h3></div></div><div class="ecard-gallery" id="ecardGallery"></div></div></div><div class="profile-section" id="caseSection"><h3>案例</h3><div class="case-list" id="profileCases"></div></div><div class="profile-section" id="bniSection"><h3>近期 BNI 合作</h3><div class="bni-list" id="profileBNI"></div></div></div></div></div>
 </body>
 </html>
