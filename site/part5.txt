@@ -127,10 +127,27 @@ function renderProfessionalDetails(row){
   const scopeHtml=scope?(hasFlow?`<div class="professional-block"><div class="professional-detail-label">服務流程</div><div class="professional-flow">${flow.map((x,i)=>`${i?'<span class="professional-flow-arrow">→</span>':''}<span class="professional-flow-step">${esc(x)}</span>`).join('')}</div></div>`:`<div class="professional-block"><div class="professional-detail-label">常見施工／服務內容</div><div class="professional-text">${esc(scope)}</div></div>`):'';
   wrap.innerHTML=categoryHtml+serviceHtml+problemHtml+scopeHtml;
 }
-openProfile=async function(name){
+function memberFromProfileUrl(){
+  const number=new URL(window.location.href).searchParams.get('member');
+  if(!number||!/^[0-9]{1,5}$/.test(number))return null;
+  for(const [name,profile] of backendProfiles){
+    if(Number(profile.member?.member_no)===Number(number))return name;
+  }
+  return null;
+}
+openProfile=async function(name,options={}){
   if(!hasProfileData(name))return;
   const m=memberByName(name);if(!m)return;
   const p=backendProfiles.get(name)||{member:{},cases:[],collabs:[],contacts:[]},row=p.member||{};
+  const number=Number(row.member_no);
+  if(options.updateUrl!==false&&Number.isInteger(number)&&number>0){
+    const url=new URL(window.location.href);
+    if(url.searchParams.get('member')!==String(number).padStart(2,'0')){
+      url.searchParams.set('member',String(number).padStart(2,'0'));
+      window.history.pushState({bniMemberOverlay:true},'',url.pathname+url.search+url.hash);
+    }
+  }
+  document.title=name+'｜砌好厝3.0';
 
   document.getElementById('profileCompany').textContent=m.company||'';
   document.getElementById('profileName').textContent=m.name||'';
@@ -159,5 +176,22 @@ openProfile=async function(name){
 
   await Promise.allSettled([renderEcardGallery(m),renderContacts(m)]);
 };
-window.addEventListener('DOMContentLoaded',async()=>{await loadBackendProfiles()});
+window.addEventListener('popstate',()=>{
+  const name=memberFromProfileUrl();
+  if(name)openProfile(name,{updateUrl:false});
+  else closeProfile({updateUrl:false});
+});
+window.addEventListener('DOMContentLoaded',async()=>{
+  await loadBackendProfiles();
+  const requested=new URL(window.location.href).searchParams.get('member');
+  if(requested){
+    const name=memberFromProfileUrl();
+    if(name)openProfile(name,{updateUrl:false});
+    else{
+      const url=new URL(window.location.href);
+      url.searchParams.delete('member');
+      window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+    }
+  }
+});
 </script>
