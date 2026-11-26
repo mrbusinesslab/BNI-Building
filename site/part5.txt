@@ -44,7 +44,7 @@ const dynamicProcessConfig={
   ]
 };
 
-function trackPublic(event_type,data={}){try{publicSb.from('bni_behavior_events').insert({event_type,member_name:data.member_name||null,intent:data.intent||null,query_text:data.query_text||null,meta:data.meta||{}}).then(()=>{})}catch(e){}}
+function trackPublic(event_type,data={}){try{window.bniAnalytics?.track(event_type,data)}catch(e){}try{publicSb.from('bni_behavior_events').insert({event_type,member_name:data.member_name||null,intent:data.intent||null,query_text:data.query_text||null,meta:data.meta||{}}).then(()=>{}).catch(()=>{})}catch(e){}}
 function contactIcon(type){return type==='phone'?'☎':type==='instagram'?'IG':type==='facebook'?'f':String(type||'').includes('line')?'LINE':'↗'}
 function memberRoles(m){return Array.isArray(m.role_keys)?m.role_keys:[]}
 function memberProblems(m){return Array.isArray(m.problem_keys)?m.problem_keys:[]}
@@ -144,6 +144,7 @@ openProfile=async function(name,options={}){
   const m=memberByName(name);if(!m)return;
   const p=backendProfiles.get(name)||{member:{},cases:[],collabs:[],contacts:[]},row=p.member||{};
   const number=Number(row.member_no);
+  try{window.bniAnalytics?.track('member_view',{member_name:name})}catch(e){}
   if(options.updateUrl!==false&&Number.isInteger(number)&&number>0){
     const url=new URL(window.location.href);
     const memberPath='/BNI-Building/member/'+String(number).padStart(2,'0')+'.html';
