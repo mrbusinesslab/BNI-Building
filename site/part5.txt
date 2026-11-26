@@ -44,7 +44,7 @@ const dynamicProcessConfig={
   ]
 };
 
-function trackPublic(event_type,data={}){try{window.bniAnalytics?.track(event_type,data)}catch(e){}try{publicSb.from('bni_behavior_events').insert({event_type,member_name:data.member_name||null,intent:data.intent||null,query_text:data.query_text||null,meta:data.meta||{}}).then(()=>{}).catch(()=>{})}catch(e){}}
+function trackPublic(event_type,data={}){try{window.bniAnalytics?.track(event_type,data)}catch(e){}}
 function contactIcon(type){return type==='phone'?'☎':type==='instagram'?'IG':type==='facebook'?'f':String(type||'').includes('line')?'LINE':'↗'}
 function memberRoles(m){return Array.isArray(m.role_keys)?m.role_keys:[]}
 function memberProblems(m){return Array.isArray(m.problem_keys)?m.problem_keys:[]}
