@@ -21,6 +21,21 @@
       return number ? String(number) : '';
     }catch(_){return ''}
   }
+  function publicMemberName(name){
+    // Resolve only a displayed content subject, never the visitor's identity.
+    try{
+      const members=typeof allMembers!=='undefined'&&Array.isArray(allMembers)?allMembers:[];
+      const member=members.find(m=>m.name===name);
+      return member?String(member.name).slice(0,100):'';
+    }catch(_){return ''}
+  }
+  function needName(need){
+    try{
+      const needs=typeof needsData!=='undefined'&&Array.isArray(needsData)?needsData:[];
+      const item=needs.find(n=>n.key===need);
+      return item?String(item.title||'').slice(0,100):'';
+    }catch(_){return ''}
+  }
   function key(value){
     const s=String(value||'');
     return /^[a-zA-Z0-9_-]{1,60}$/.test(s)?s:'';
@@ -62,8 +77,14 @@
       };
       const number=memberId(data.member_name);
       if(number)params.member_id=number;
+      const memberName=publicMemberName(data.member_name);
+      if(memberName)params.member_name=memberName;
       const need=key(data.meta?.need_key);
-      if(need)params.need_key=need;
+      if(need){
+        params.need_key=need;
+        const title=needName(need);
+        if(title)params.need_name=title;
+      }
       const intent=key(data.intent);
       if(intent)params.intent=intent;
       const step=Number(data.meta?.step_index);
@@ -73,7 +94,7 @@
         params.contact_type=contactType(data);
         params.entry_point=type==='assistant_contact_click'?'assistant':'member_profile';
       }
-      // Never spread data/meta: they can contain questions, names or addresses.
+      // Never spread data/meta: they can contain free text or private contact details.
       window.gtag('event',eventName,params);
     }catch(_){ /* Analytics failure must not block the site or backend logging. */ }
   }
